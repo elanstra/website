@@ -58,6 +58,10 @@
                 transform: translateY(-100px) rotate(0deg);
                 opacity: 1;
             }
+            50% {
+                transform: translateY(calc(50vh)) rotate(180deg);
+                opacity: 0.7;
+            }
             100% {
                 transform: translateY(calc(100vh + 100px)) rotate(360deg);
                 opacity: 0;
@@ -199,12 +203,35 @@
             box-shadow: 0 4px 20px rgba(98, 0, 234, 0.3);
             transform: translateY(20px);
             opacity: 0;
-            animation: fadeInUp 1s ease 0.6s forwards;
+            animation: fadeInUp 1s ease 0.6s forwards, pulse 2s infinite 1.5s;
             cursor: pointer;
             border: none;
             font-size: 1rem;
             position: relative;
             overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .cta-button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: all 0.6s;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
         }
         
         .cta-button:hover {
@@ -236,28 +263,40 @@
             z-index: 1000;
             transition: all 0.5s ease;
             pointer-events: none;
-            background-image: url('/api/placeholder/80/80'); /* Placeholder for disco ball texture */
-            background-size: cover;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(160,160,160,0.8));
             position: relative;
+            overflow: hidden;
         }
         
         /* Disco ball mirror facets */
-        .disco-ball::before {
+        .disco-ball::before,
+        .disco-ball::after {
             content: "";
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+        
+        .disco-ball::before {
             background: 
-                linear-gradient(45deg, rgba(255,255,255,0.8) 25%, transparent 25%), 
-                linear-gradient(-45deg, rgba(255,255,255,0.8) 25%, transparent 25%), 
-                linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.8) 75%), 
-                linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.8) 75%);
+                linear-gradient(45deg, rgba(255,255,255,0.7) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(255,255,255,0.7) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.7) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.7) 75%);
             background-size: 10px 10px;
             background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
-            border-radius: 50%;
-            opacity: 0.7;
+        }
+        
+        .disco-ball::after {
+            background: 
+                linear-gradient(90deg, transparent 47%, rgba(255,255,255,0.9) 48%, rgba(255,255,255,0.9) 52%, transparent 53%),
+                linear-gradient(0deg, transparent 47%, rgba(255,255,255,0.9) 48%, rgba(255,255,255,0.9) 52%, transparent 53%);
+            background-size: 20px 20px;
+            opacity: 0.3;
         }
         
         body.disco-mode .disco-ball {
@@ -539,7 +578,7 @@
         </div>
         <div class="container">
             <h2 class="hero-title">Hey, fijn dat je er bent!</h2>
-            <p class="hero-description">Deze space staat helemaal tot jouw beschikking. Niet veel te zien, maar veel te voelen – zoals die ene Tinder date die meer in je portemonnee dan in jou geïnteresseerd was.</p>
+            <p class="hero-description">Deze space staat helemaal tot jouw beschikking. Niet veel te zien, maar veel te voelen zoals die ene Tinder date die meer in je portemonnee dan in jou geïnteresseerd was.</p>
             <button class="cta-button" id="disco-button">KLIK VOOR DISCO MADNESS</button>
         </div>
     </section>
@@ -632,6 +671,75 @@
                 }, duration * 1000);
             }
             
+            // Function to create initial confetti explosion
+            function createInitialConfettiExplosion() {
+                // Create a lot of confetti at once for a big explosion effect
+                for (let i = 0; i < 150; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.classList.add('confetti');
+                        
+                        // More random position - spread throughout the screen
+                        const startX = Math.random() * window.innerWidth;
+                        const startY = Math.random() * window.innerHeight * 0.5;
+                        
+                        // Random color
+                        const colors = ['#FFC107', '#E91E63', '#03DAC6', '#6200EA', '#76FF03', '#FF5722', '#CDDC39'];
+                        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        // Random size
+                        const size = Math.random() * 15 + 5;
+                        
+                        // Random shape
+                        const shapes = ['square', 'circle', 'triangle', 'star'];
+                        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                        
+                        confetti.style.left = startX + 'px';
+                        confetti.style.top = startY + 'px';
+                        confetti.style.backgroundColor = randomColor;
+                        confetti.style.width = size + 'px';
+                        confetti.style.height = size + 'px';
+                        
+                        if (shape === 'circle') {
+                            confetti.style.borderRadius = '50%';
+                        } else if (shape === 'triangle') {
+                            confetti.style.width = '0';
+                            confetti.style.height = '0';
+                            confetti.style.backgroundColor = 'transparent';
+                            confetti.style.borderLeft = (size/2) + 'px solid transparent';
+                            confetti.style.borderRight = (size/2) + 'px solid transparent';
+                            confetti.style.borderBottom = size + 'px solid ' + randomColor;
+                        } else if (shape === 'star') {
+                            confetti.style.backgroundColor = 'transparent';
+                            confetti.style.width = '0';
+                            confetti.style.height = '0';
+                            confetti.style.borderRight = `${size}px solid transparent`;
+                            confetti.style.borderBottom = `${size*0.7}px solid ${randomColor}`;
+                            confetti.style.borderLeft = `${size}px solid transparent`;
+                            confetti.style.transformOrigin = 'bottom center';
+                            confetti.style.transform = 'rotate(70deg)';
+                        }
+                        
+                        // Random animation duration
+                        const duration = Math.random() * 4 + 2;
+                        confetti.style.animationDuration = duration + 's';
+                        
+                        // Random direction
+                        const direction = Math.random() * 360;
+                        const distance = Math.random() * 200 + 100;
+                        confetti.style.setProperty('--direction', direction + 'deg');
+                        confetti.style.setProperty('--distance', distance + 'px');
+                        
+                        document.body.appendChild(confetti);
+                        
+                        // Remove confetti after animation completes
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, duration * 1000);
+                    }, i * 10); // Stagger the creation for a cascading effect
+                }
+            }
+            
             // Function to create lasers
             function createLaser() {
                 const laser = document.createElement('div');
@@ -676,6 +784,7 @@
             let laserInterval;
             let audioContext;
             let discoSound;
+            let hasPlayedInitialConfetti = false;
             
             discoButton.addEventListener('click', function() {
                 discoMode = !discoMode;
@@ -685,7 +794,13 @@
                     body.classList.add('disco-mode');
                     discoButton.textContent = 'STOP DE WAANZIN!';
                     
-                    // Launch confetti
+                    // Launch initial confetti explosion only on first activation
+                    if (!hasPlayedInitialConfetti) {
+                        createInitialConfettiExplosion();
+                        hasPlayedInitialConfetti = true;
+                    }
+                    
+                    // Launch regular confetti
                     confettiInterval = setInterval(() => {
                         for (let i = 0; i < 5; i++) {
                             createConfetti();
