@@ -138,13 +138,15 @@
         
         body.disco-mode .hero::before {
             animation: disco-radial 3s infinite;
+            opacity: 1;
+            background: radial-gradient(circle at center, rgba(98, 0, 234, 0.5) 0%, rgba(18, 18, 18, 0.7) 70%);
         }
         
         @keyframes disco-radial {
-            0% { background: radial-gradient(circle at center, rgba(98, 0, 234, 0.5) 0%, rgba(18, 18, 18, 1) 70%); }
-            33% { background: radial-gradient(circle at center, rgba(233, 30, 99, 0.5) 0%, rgba(18, 18, 18, 1) 70%); }
-            66% { background: radial-gradient(circle at center, rgba(3, 218, 198, 0.5) 0%, rgba(18, 18, 18, 1) 70%); }
-            100% { background: radial-gradient(circle at center, rgba(98, 0, 234, 0.5) 0%, rgba(18, 18, 18, 1) 70%); }
+            0% { background: radial-gradient(circle at center, rgba(98, 0, 234, 0.5) 0%, rgba(18, 18, 18, 0.7) 70%); }
+            33% { background: radial-gradient(circle at center, rgba(233, 30, 99, 0.5) 0%, rgba(18, 18, 18, 0.7) 70%); }
+            66% { background: radial-gradient(circle at center, rgba(3, 218, 198, 0.5) 0%, rgba(18, 18, 18, 0.7) 70%); }
+            100% { background: radial-gradient(circle at center, rgba(98, 0, 234, 0.5) 0%, rgba(18, 18, 18, 0.7) 70%); }
         }
         
         .hero-title {
@@ -176,6 +178,13 @@
             transform: translateY(20px);
             opacity: 0;
             animation: fadeInUp 1s ease 0.3s forwards;
+        }
+        
+        body.disco-mode .hero-description {
+            opacity: 1;
+            transform: translateY(0);
+            color: var(--light-text);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
         }
         
         .cta-button {
