@@ -1,24 +1,137 @@
-<div class="contact">
-  <h1>Stuur mij een e-mail</h1>
-  <p>
-    Of je nou per ongeluk op deze site beland bent terwijl je eigenlijk een blender wilde bestellen,<br>
-    of bewust hier bent om eindelijk die digitale liefde te verklaren voor strak webdesign met de energie van een <strong>hyperactieve wombat op een hoverboard</strong> – je bent hier nu. Deal ermee.
-  </p>
-  <p>
-    📩 <a href="mailto:contact@svendijkstra.nl">contact@svendijkstra.nl</a> – voor serieuze zaken zoals: "Wat kost een website met glitter-effecten en confetti bij scrollen?"
-    <br>
-    🍑 <a href="mailto:sexy@svendijkstra.nl">sexy@svendijkstra.nl</a> – voor onserieuze zaken zoals: "Ik heb een foto van mijn kat in een croissant-pakje, wil je die zien?"
-  </p>
-  <p>
-    Je bericht landt in een inbox met meer karakter dan een lege fles wodka na een festival-afterparty:<br>
-    <em>enigszins plakkerig, licht verwarrend, maar vol verhalen</em>.
-  </p>
-  <p>
-    📎 Voeg gerust een GIF, kat, conceptalbum, huilbui of PowerPoint toe.<br>
-    Alles wordt gelezen, beoordeeld, mogelijk geanalyseerd door een AI met liefdesverdriet.
-  </p>
-  <p>
-    Ps. Als je niks stuurt… ook goed. Dan blijft dit gewoon een prachtig stuk digitale ruimte met evenveel inhoud als het hoofd van een TikTok-guru op een dopamine-detox.
-  </p>
-  <button class="disco-btn" id="toggle">💃 Zet Lava Disco aan (of niet, whatever)</button>
-</div>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact — Svendijkstra.nl</title>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --text: #e0e0e0;
+      --accent: #ff00ff;
+      --disco1: #ff00ff;
+      --disco2: #00ffff;
+      --disco3: #ffff00;
+      --disco4: #ff6600;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Comic Sans MS', 'Courier New', monospace;
+      padding: 3rem 1.5rem;
+      transition: background 0.6s ease;
+    }
+
+    .contact {
+      max-width: 700px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 40px rgba(255, 0, 255, 0.1);
+      backdrop-filter: blur(4px);
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 1.2rem;
+      color: var(--accent);
+      text-shadow: 0 0 10px var(--accent);
+    }
+
+    p {
+      margin-bottom: 1.2rem;
+      line-height: 1.7;
+      font-size: 1.1rem;
+    }
+
+    a {
+      color: #00ffff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: var(--accent);
+    }
+
+    em {
+      color: #aaa;
+      font-style: italic;
+    }
+
+    .disco-btn {
+      margin-top: 1.5rem;
+      background-color: var(--accent);
+      color: #000;
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 2rem;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 0 15px var(--accent);
+    }
+
+    .disco-btn:hover {
+      transform: scale(1.05) rotate(-2deg);
+      background-color: #fff;
+      color: var(--accent);
+    }
+
+    /* Disco Mode Activated */
+    .disco-mode {
+      animation: discoBg 1s infinite linear;
+    }
+
+    @keyframes discoBg {
+      0% { background-color: var(--disco1); }
+      25% { background-color: var(--disco2); }
+      50% { background-color: var(--disco3); }
+      75% { background-color: var(--disco4); }
+      100% { background-color: var(--disco1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="contact">
+    <h1>Stuur mij een e-mail</h1>
+    <p>
+      Of je nou per ongeluk op deze site beland bent terwijl je eigenlijk een blender wilde bestellen,<br>
+      of bewust hier bent om eindelijk die digitale liefde te verklaren voor strak webdesign met de energie van een <strong>hyperactieve wombat op een hoverboard</strong> – je bent hier nu. Deal ermee.
+    </p>
+    <p>
+      📩 <a href="mailto:contact@svendijkstra.nl">contact@svendijkstra.nl</a> – voor serieuze zaken zoals: "Wat kost een website met glitter-effecten en confetti bij scrollen?"
+      <br>
+      🍑 <a href="mailto:sexy@svendijkstra.nl">sexy@svendijkstra.nl</a> – voor onserieuze zaken zoals: "Ik heb een foto van mijn kat in een croissant-pakje, wil je die zien?"
+    </p>
+    <p>
+      Je bericht landt in een inbox met meer karakter dan een lege fles wodka na een festival-afterparty:<br>
+      <em>enigszins plakkerig, licht verwarrend, maar vol verhalen</em>.
+    </p>
+    <p>
+      📎 Voeg gerust een GIF, kat, conceptalbum, huilbui of PowerPoint toe.<br>
+      Alles wordt gelezen, beoordeeld, mogelijk geanalyseerd door een AI met liefdesverdriet.
+    </p>
+    <p>
+      Ps. Als je niks stuurt… ook goed. Dan blijft dit gewoon een prachtig stuk digitale ruimte met evenveel inhoud als het hoofd van een TikTok-guru op een dopamine-detox.
+    </p>
+    <button class="disco-btn" id="toggle">💃 Zet Lava Disco aan (of niet, whatever)</button>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById('toggle');
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('disco-mode');
+    });
+  </script>
+</body>
+</html>
