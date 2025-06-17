@@ -11,22 +11,99 @@
       --accent: #ff00ff;
       --disco1: #ff00ff;
       --disco2: #00ffff;
-      --disco3: #ffff00;
-      --disco4: #ff6600;
+      --disco3: #00ff88;
+      --disco4: #0066ff;
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-
     body {
-      background-color: var(--bg);
+      background: var(--bg);
       color: var(--text);
       font-family: 'Comic Sans MS', 'Courier New', monospace;
       padding: 3rem 1.5rem;
-      transition: background 0.6s ease;
+      position: relative;
+      overflow-x: hidden;
+      transition: all 0.6s ease;
+    }
+
+    .lava-bubble {
+      position: fixed;
+      opacity: 0.25;
+      filter: blur(12px);
+      mix-blend-mode: screen;
+      z-index: -1;
+      animation: float 12s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+    }
+
+    .lava-bubble:nth-child(1) {
+      width: 150px;
+      height: 180px;
+      background: radial-gradient(ellipse, #ff00ff 0%, #ff006640 100%);
+      border-radius: 60% 40% 70% 30%;
+      left: 10%;
+      animation-name: floatMorph1, floatHorizontal;
+    }
+
+    .lava-bubble:nth-child(2) {
+      width: 140px;
+      height: 200px;
+      background: radial-gradient(ellipse, #00ffff 0%, #00ffff40 100%);
+      border-radius: 70% 30% 60% 40%;
+      right: 15%;
+      animation-delay: -3s;
+      animation-name: floatMorph2, floatHorizontal;
+    }
+
+    .lava-bubble:nth-child(3) {
+      width: 100px;
+      height: 160px;
+      background: radial-gradient(ellipse, #00ff88 0%, #00ff8840 100%);
+      border-radius: 50% 50% 80% 20%;
+      left: 65%;
+      animation-delay: -5s;
+      animation-name: floatMorph3, floatHorizontal;
+    }
+
+    .lava-bubble:nth-child(4) {
+      width: 110px;
+      height: 170px;
+      background: radial-gradient(ellipse, #0066ff 0%, #0066ff40 100%);
+      border-radius: 40% 60% 50% 50%;
+      right: 60%;
+      animation-delay: -1s;
+      animation-name: floatMorph4, floatHorizontal;
+    }
+
+    @keyframes floatHorizontal {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(20px); }
+    }
+
+    @keyframes floatMorph1 {
+      0%   { transform: translateY(100vh) scale(0.5); opacity: 0; }
+      50%  { transform: translateY(50vh) scale(1.1); border-radius: 40% 60% 30% 70%; }
+      100% { transform: translateY(-5vh) scale(0.5); opacity: 0; }
+    }
+
+    @keyframes floatMorph2 {
+      0%   { transform: translateY(100vh) scale(0.4) rotate(0deg); opacity: 0; }
+      50%  { transform: translateY(50vh) scale(1.1) rotate(10deg); border-radius: 30% 70% 40% 60%; }
+      100% { transform: translateY(-5vh) scale(0.4) rotate(20deg); opacity: 0; }
+    }
+
+    @keyframes floatMorph3 {
+      0%   { transform: translateY(100vh) scale(0.5); opacity: 0; }
+      50%  { transform: translateY(50vh) scale(1) border-radius: 80% 20% 40% 60%; }
+      100% { transform: translateY(-5vh) scale(0.5); opacity: 0; }
+    }
+
+    @keyframes floatMorph4 {
+      0%   { transform: translateY(100vh) scale(0.5) rotate(0deg); opacity: 0; }
+      50%  { transform: translateY(50vh) scale(1) rotate(-10deg); border-radius: 30% 70% 60% 40%; }
+      100% { transform: translateY(-5vh) scale(0.5) rotate(20deg); opacity: 0; }
     }
 
     .contact {
@@ -37,6 +114,8 @@
       border-radius: 1rem;
       box-shadow: 0 0 40px rgba(255, 0, 255, 0.1);
       backdrop-filter: blur(4px);
+      position: relative;
+      z-index: 1;
     }
 
     h1 {
@@ -69,39 +148,87 @@
 
     .disco-btn {
       margin-top: 1.5rem;
-      background-color: var(--accent);
+      background: linear-gradient(135deg, var(--disco1), var(--disco2));
       color: #000;
-      padding: 0.8rem 1.2rem;
+      padding: 0.8rem 1.5rem;
       border: none;
       border-radius: 2rem;
       font-weight: bold;
       font-size: 1rem;
       cursor: pointer;
-      transition: all 0.2s ease-in-out;
-      box-shadow: 0 0 15px var(--accent);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 0 20px var(--accent);
+      position: relative;
+      overflow: hidden;
     }
 
     .disco-btn:hover {
       transform: scale(1.05) rotate(-2deg);
-      background-color: #fff;
-      color: var(--accent);
+      box-shadow: 0 0 25px var(--accent), 0 0 10px #fff;
     }
 
-    /* Disco Mode Activated */
+    .disco-btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, var(--disco1), var(--disco2), var(--disco3), var(--disco4));
+      background-size: 300% 300%;
+      opacity: 0;
+      transition: opacity 0.4s;
+      z-index: -1;
+    }
+
+    .disco-mode .disco-btn::after {
+      opacity: 1;
+      animation: buttonPulse 6s linear infinite;
+    }
+
+    @keyframes buttonPulse {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     .disco-mode {
-      animation: discoBg 1s infinite linear;
+      background: linear-gradient(-45deg, #ff00ff, #00ffff, #00ff88, #0066ff, #ff00ff);
+      background-size: 400% 400%;
+      animation: gradientShift 5s ease infinite;
     }
 
-    @keyframes discoBg {
-      0% { background-color: var(--disco1); }
-      25% { background-color: var(--disco2); }
-      50% { background-color: var(--disco3); }
-      75% { background-color: var(--disco4); }
-      100% { background-color: var(--disco1); }
+    .disco-mode::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(255, 0, 255, 0.2) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(0, 255, 255, 0.2) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 40%, rgba(255, 255, 0, 0.1) 0%, transparent 50%);
+      z-index: -2;
+      animation: lavaMove 12s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes lavaMove {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      33%      { transform: scale(1.1) rotate(120deg); }
+      66%      { transform: scale(0.9) rotate(240deg); }
     }
   </style>
 </head>
 <body>
+  <!-- Lava Lamp Bubbles -->
+  <div class="lava-bubble"></div>
+  <div class="lava-bubble"></div>
+  <div class="lava-bubble"></div>
+  <div class="lava-bubble"></div>
+
   <div class="contact">
     <h1>Stuur mij een e-mail</h1>
     <p>
@@ -124,13 +251,16 @@
     <p>
       Ps. Als je niks stuurt… ook goed. Dan blijft dit gewoon een prachtig stuk digitale ruimte met evenveel inhoud als het hoofd van een TikTok-guru op een dopamine-detox.
     </p>
-    <button class="disco-btn" id="toggle">💃 Zet Lava Disco aan (of niet, whatever)</button>
+    <button class="disco-btn" id="toggle">🌋 Activeer Lava Disco Universe (of blijf basic)</button>
   </div>
 
   <script>
     const toggleBtn = document.getElementById('toggle');
     toggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('disco-mode');
+      toggleBtn.textContent = document.body.classList.contains('disco-mode')
+        ? '🔥 Lava Mode: ACTIVATED! (klik om te chillen)'
+        : '🌋 Activeer Lava Disco Universe (of blijf basic)';
     });
   </script>
 </body>
