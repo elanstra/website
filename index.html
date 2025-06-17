@@ -27,10 +27,13 @@
       position: relative;
       overflow-x: hidden;
       transition: all 0.6s ease;
+      cursor: none; /* Verberg normale cursor */
     }
 
     .lava-bubble {
       position: fixed;
+      top: 0;
+      bottom: 0;
       opacity: 0.25;
       filter: blur(12px);
       mix-blend-mode: screen;
@@ -220,6 +223,32 @@
       33%      { transform: scale(1.1) rotate(120deg); }
       66%      { transform: scale(0.9) rotate(240deg); }
     }
+
+    /* Glitter cursor */
+    .glitter-cursor {
+      position: fixed;
+      pointer-events: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff, #ff00ff);
+      box-shadow: 0 0 12px #ff00ff, 0 0 24px #00ffff, 0 0 36px #ff00ff;
+      mix-blend-mode: screen;
+      animation: sparkle 0.5s infinite alternate;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes sparkle {
+      from {
+        transform: scale(1) translate(-50%, -50%);
+        opacity: 0.8;
+      }
+      to {
+        transform: scale(1.4) translate(-50%, -50%);
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 <body>
@@ -254,6 +283,9 @@
     <button class="disco-btn" id="toggle">🌋 Activeer Lava Disco Universe (of blijf basic)</button>
   </div>
 
+  <!-- Glitter cursor -->
+  <div class="glitter-cursor" id="glitter"></div>
+
   <script>
     const toggleBtn = document.getElementById('toggle');
     toggleBtn.addEventListener('click', () => {
@@ -261,6 +293,13 @@
       toggleBtn.textContent = document.body.classList.contains('disco-mode')
         ? '🔥 Lava Mode: ACTIVATED! (klik om te chillen)'
         : '🌋 Activeer Lava Disco Universe (of blijf basic)';
+    });
+
+    // Glitter cursor script
+    const glitter = document.getElementById('glitter');
+    document.addEventListener('mousemove', (e) => {
+      glitter.style.left = `${e.clientX}px`;
+      glitter.style.top = `${e.clientY}px`;
     });
   </script>
 </body>
