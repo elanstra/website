@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tegenwind Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://rsms.me/inter/inter.css');
+        html { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        
+        <div class="w-full max-w-4xl mx-auto">
+            
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-slate-900">Tegenwind Dashboard</h1>
+                <p class="text-slate-600 mt-2">Bereken je tegen- of meewind voor elke reis.</p>
+            </header>
+
+            <!-- Input Form -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                <form method="POST" action="/" class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="w-full">
+                        <label for="departure" class="block text-sm font-medium text-slate-700 mb-1">Vertrek</label>
+                        <input type="text" id="departure" name="departure" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="bv. Amsterdam" required>
+                    </div>
+                    <div class="w-full">
+                        <label for="destination" class="block text-sm font-medium text-slate-700 mb-1">Bestemming</label>
+                        <input type="text" id="destination" name="destination" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="bv. Utrecht" required>
+                    </div>
+                    <div class="w-full md:w-auto pt-0 md:pt-5">
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow">Bereken</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Error Message -->
+            {% if error %}
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-8" role="alert">
+                <p class="font-bold">Fout</p>
+                <p>{{ error }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Results Dashboard -->
+            {% if results %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Wind Card -->
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">Actuele Wind</h2>
+                    <p class="text-4xl font-bold">{{ results.wind.speed }} <span class="text-2xl font-medium text-slate-500">km/u</span></p>
+                    <p class="text-lg text-slate-700">uit {{ results.wind.direction }}° ({{ results.wind_compass }})</p>
+                </div>
+
+                <!-- Travel Card -->
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">Jouw Reis</h2>
+                    <p class="text-4xl font-bold">{{ "%.1f"|format(results.travel_bearing) }}°</p>
+                    <p class="text-lg text-slate-700">{{ results.departure.name }} &rarr; {{ results.destination.name }}</p>
+                </div>
+
+                <!-- Result Card -->
+                <div class="bg-white p-6 rounded-xl shadow-md md:col-span-2 lg:col-span-1 {% if results.headwind_percentage > 5 %}bg-red-50 border-red-200{% elif results.headwind_percentage < -5 %}bg-green-50 border-green-200{% else %}bg-slate-50 border-slate-200{% endif %} border">
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">Resultaat</h2>
+                    {% if results.headwind_percentage > 5 %}
+                        <p class="text-4xl font-bold text-red-600">{{ "%.1f"|format(results.headwind_percentage) }}%</p>
+                        <p class="text-lg text-red-800">Tegenwind</p>
+                    {% elif results.headwind_percentage < -5 %}
+                        <p class="text-4xl font-bold text-green-600">{{ "%.1f"|format(results.headwind_percentage * -1) }}%</p>
+                        <p class="text-lg text-green-800">Meewind</p>
+                    {% else %}
+                        <p class="text-4xl font-bold text-slate-600">~0%</p>
+                        <p class="text-lg text-slate-800">Zijwind</p>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</body>
+</html>
