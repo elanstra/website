@@ -1,91 +1,310 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tegenwind Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Systeem Configuratie...</title>
+    <!-- Roboto font is essentieel voor de Material look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://rsms.me/inter/inter.css');
-        html { font-family: 'Inter', sans-serif; }
+        /* MD3 Design Tokens & Reset */
+        :root {
+            /* Palet gebaseerd op de geüploade afbeelding */
+            --color-teal-dark: #005658;
+            --color-teal-vibrant: #169388;
+            --color-mint: #9ADED4;
+            --color-cream: #F8F3EB;
+            --color-black: #121514;
+
+            /* Material Design 3 Light Theme Mapping */
+            --md-sys-color-background: var(--color-mint);
+            --md-sys-color-surface-container: var(--color-cream);
+            
+            /* Tekst kleuren (Dark on Light) */
+            --md-sys-color-on-surface: var(--color-black);
+            --md-sys-color-on-surface-variant: var(--color-teal-dark);
+            
+            /* Progress bar & Buttons */
+            --md-sys-color-primary: var(--color-teal-vibrant);
+            --md-sys-color-primary-container: var(--color-teal-dark);
+            --md-sys-color-on-primary-container: var(--color-mint);
+            
+            /* Shapes */
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 999px;
+
+            /* Elevation (zachter voor light mode) */
+            --md-sys-elevation-level2: 0px 4px 12px rgba(0, 86, 88, 0.15), 0px 1px 3px rgba(0, 86, 88, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-surface);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Container Card */
+        .card {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            padding: 48px 32px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: var(--md-sys-elevation-level2);
+            text-align: center;
+            transition: opacity 0.6s cubic-bezier(0.2, 0, 0, 1);
+            position: relative;
+        }
+
+        .card--hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+        }
+
+        .card__headline {
+            margin: 0 0 32px 0;
+            font-size: 24px;
+            line-height: 32px;
+            font-weight: 400;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* Progress Indicator */
+        .progress-container {
+            height: 6px; /* Iets dikker voor light mode */
+            background-color: rgba(0, 86, 88, 0.1); /* Subtiele track kleur */
+            border-radius: var(--md-sys-shape-corner-full);
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background-color: var(--md-sys-color-primary);
+            border-radius: var(--md-sys-shape-corner-full);
+            animation: infinite-load 45s cubic-bezier(0.2, 0.8, 0.8, 0.1) forwards;
+        }
+
+        /* Status Text */
+        .status-text {
+            display: block;
+            min-height: 24px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .percentage-text {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--md-sys-color-primary);
+            letter-spacing: 0.5px;
+        }
+
+        /* Easter Egg Card */
+        .easter-egg-card {
+            display: none;
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            padding: 48px 32px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: var(--md-sys-elevation-level2);
+            text-align: center;
+            animation: pop-in 0.6s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards;
+        }
+
+        .easter-egg__headline {
+            font-size: 28px;
+            color: var(--md-sys-color-primary);
+            margin: 0 0 16px 0;
+            font-weight: 400;
+        }
+
+        .easter-egg__body {
+            font-size: 16px;
+            line-height: 24px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 32px;
+        }
+
+        /* Button style */
+        .easter-egg__button {
+            display: inline-block;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            padding: 14px 28px;
+            border-radius: var(--md-sys-shape-corner-full);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .easter-egg__button:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+
+        /* Keyframes */
+        @keyframes infinite-load {
+            0% { width: 0%; }
+            10% { width: 25%; }
+            30% { width: 60%; }
+            50% { width: 75%; }
+            70% { width: 88%; }
+            85% { width: 94%; }
+            95% { width: 98%; }
+            98% { width: 99%; }
+            100% { width: 99%; } 
+        }
+
+        @keyframes pop-in {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body>
 
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+    <!-- De Loader Card -->
+    <div class="card" id="loader-card">
+        <h1 class="card__headline">Domein configureren</h1>
         
-        <div class="w-full max-w-4xl mx-auto">
-            
-            <!-- Header -->
-            <header class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-slate-900">Tegenwind Dashboard</h1>
-                <p class="text-slate-600 mt-2">Bereken je tegen- of meewind voor elke reis.</p>
-            </header>
-
-            <!-- Input Form -->
-            <div class="bg-white p-6 rounded-xl shadow-md mb-8">
-                <form method="POST" action="/" class="flex flex-col md:flex-row items-center gap-4">
-                    <div class="w-full">
-                        <label for="departure" class="block text-sm font-medium text-slate-700 mb-1">Vertrek</label>
-                        <input type="text" id="departure" name="departure" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="bv. Amsterdam" required>
-                    </div>
-                    <div class="w-full">
-                        <label for="destination" class="block text-sm font-medium text-slate-700 mb-1">Bestemming</label>
-                        <input type="text" id="destination" name="destination" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="bv. Utrecht" required>
-                    </div>
-                    <div class="w-full md:w-auto pt-0 md:pt-5">
-                        <button type="submit" class="w-full bg-blue-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow">Bereken</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Error Message -->
-            {% if error %}
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-8" role="alert">
-                <p class="font-bold">Fout</p>
-                <p>{{ error }}</p>
-            </div>
-            {% endif %}
-
-            <!-- Results Dashboard -->
-            {% if results %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                <!-- Wind Card -->
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-lg font-bold text-slate-900 mb-2">Actuele Wind</h2>
-                    <p class="text-4xl font-bold">{{ results.wind.speed }} <span class="text-2xl font-medium text-slate-500">km/u</span></p>
-                    <p class="text-lg text-slate-700">uit {{ results.wind.direction }}° ({{ results.wind_compass }})</p>
-                </div>
-
-                <!-- Travel Card -->
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-lg font-bold text-slate-900 mb-2">Jouw Reis</h2>
-                    <p class="text-4xl font-bold">{{ "%.1f"|format(results.travel_bearing) }}°</p>
-                    <p class="text-lg text-slate-700">{{ results.departure.name }} &rarr; {{ results.destination.name }}</p>
-                </div>
-
-                <!-- Result Card -->
-                <div class="bg-white p-6 rounded-xl shadow-md md:col-span-2 lg:col-span-1 {% if results.headwind_percentage > 5 %}bg-red-50 border-red-200{% elif results.headwind_percentage < -5 %}bg-green-50 border-green-200{% else %}bg-slate-50 border-slate-200{% endif %} border">
-                    <h2 class="text-lg font-bold text-slate-900 mb-2">Resultaat</h2>
-                    {% if results.headwind_percentage > 5 %}
-                        <p class="text-4xl font-bold text-red-600">{{ "%.1f"|format(results.headwind_percentage) }}%</p>
-                        <p class="text-lg text-red-800">Tegenwind</p>
-                    {% elif results.headwind_percentage < -5 %}
-                        <p class="text-4xl font-bold text-green-600">{{ "%.1f"|format(results.headwind_percentage * -1) }}%</p>
-                        <p class="text-lg text-green-800">Meewind</p>
-                    {% else %}
-                        <p class="text-4xl font-bold text-slate-600">~0%</p>
-                        <p class="text-lg text-slate-800">Zijwind</p>
-                    {% endif %}
-                </div>
-
-            </div>
-            {% endif %}
-
+        <div class="progress-container">
+            <div class="progress-bar"></div>
         </div>
+
+        <span class="status-text" id="status-text">Verbinding maken...</span>
+        <div class="percentage-text" id="percentage-text">0%</div>
     </div>
 
+    <!-- De Easter Egg Card -->
+    <div class="easter-egg-card" id="easter-egg-card">
+        <h1 class="easter-egg__headline">Geduld wordt beloond</h1>
+        <p class="easter-egg__body">
+            Je hebt serieus 10 minuten naar een CSS-animatie zitten staren.<br>
+            Of je hebt doorzettingsvermogen, of je internet ligt eruit.<br><br>
+            Laten we maar gewoon mailen.
+        </p>
+        <a href="mailto:contact@svendijkstra.nl" class="easter-egg__button">contact@svendijkstra.nl</a>
+    </div>
+
+    <script>
+        const messages = [
+            "DNS records ophalen...",
+            "Server cluster toewijzen...",
+            "SSL certificaten genereren...",
+            "Handshake protocol verifiëren...",
+            "Database indexen optimaliseren...",
+            "Pixels rechtzetten...",
+            "Koffie zetten voor de sysadmin...",
+            "De laatste bits oppoetsen...",
+            "Wachten op respons van de backbone...",
+            "Even geduld, bijna klaar...",
+            "Controleren op typfouten...",
+            "Firewall regels toepassen...",
+            "Nog heel even...",
+            "Dit duurt iets langer dan normaal...",
+            "Verbinding herbevestigen...",
+            "Zit je er nog steeds?",
+            "Packet loss compenseren...",
+            "Waarom duurt dit zo lang?",
+            "Oké, nu echt bijna klaar...",
+            "Finishing touches...",
+            "99% is ook een percentage...",
+        ];
+
+        const loaderCard = document.getElementById('loader-card');
+        const easterEggCard = document.getElementById('easter-egg-card');
+        const statusElement = document.getElementById('status-text');
+        const percentageElement = document.getElementById('percentage-text');
+        
+        let messageIndex = 0;
+        let progress = 0;
+        let animationRunning = true;
+        let loopId;
+
+        // 10 minuten timer
+        const EGG_TIMER_MS = 600000; 
+        // const EGG_TIMER_MS = 5000; // Uncomment voor testen
+
+        function updateStatus() {
+            if (!animationRunning) return;
+
+            if (messageIndex < messages.length) {
+                statusElement.textContent = messages[messageIndex];
+                messageIndex++;
+                const nextUpdate = Math.random() * 2000 + 2000;
+                
+                if (messageIndex > messages.length - 5) {
+                    setTimeout(updateStatus, 5000);
+                } else {
+                    setTimeout(updateStatus, nextUpdate);
+                }
+            } else {
+                messageIndex = messages.length - 3;
+                setTimeout(updateStatus, 4000);
+            }
+        }
+
+        function updatePercentage() {
+            if (!animationRunning) return;
+
+            if (progress < 60) {
+                progress += Math.random() * 2;
+            } else if (progress < 85) {
+                progress += Math.random() * 0.5;
+            } else if (progress < 99) {
+                progress += Math.random() * 0.1;
+            }
+
+            if (progress > 99) progress = 99;
+
+            percentageElement.textContent = Math.floor(progress) + "%";
+
+            if (progress < 99) {
+                loopId = requestAnimationFrame(updatePercentage);
+            }
+        }
+
+        function triggerEasterEgg() {
+            animationRunning = false;
+            cancelAnimationFrame(loopId);
+            
+            loaderCard.classList.add('card--hidden');
+            
+            setTimeout(() => {
+                loaderCard.style.display = 'none';
+                easterEggCard.style.display = 'block';
+            }, 600);
+        }
+
+        setTimeout(updateStatus, 1000);
+        updatePercentage();
+        setTimeout(triggerEasterEgg, EGG_TIMER_MS);
+
+    </script>
 </body>
 </html>
