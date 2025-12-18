@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DE INTERGALACTISCHE PIZZA KIEZER</title>
+    <!-- Tailwind CSS voor de looks -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons voor de plaatjes -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom animaties die Tailwind niet standaard heeft */
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 8s linear infinite;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-yellow-300 font-mono flex items-center justify-center p-4 selection:bg-pink-500 selection:text-white">
+
+    <!-- Achtergrond Chaos -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden opacity-20">
+        <div class="absolute top-10 left-10 text-9xl animate-bounce">🍕</div>
+        <div class="absolute bottom-20 right-20 text-9xl animate-pulse">🔥</div>
+        <div class="absolute top-1/2 left-1/4 text-8xl animate-spin-slow">💩</div>
+    </div>
+
+    <!-- Hoofd Container -->
+    <div id="app" class="max-w-lg w-full bg-white border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative z-10 transform rotate-1 hover:rotate-0 transition-transform duration-300">
+        <!-- Content wordt hierin gerenderd door JS -->
+    </div>
+
+    <!-- Footer Disclaimer -->
+    <div class="fixed bottom-2 right-2 text-[10px] font-bold text-yellow-600 opacity-50 rotate-180">
+        Gemaakt door een AI op cafeïne
+    </div>
+
+    <script>
+        // --- DATA & CONFIGURATIE ---
+        
+        const questions = [
+            {
+                id: 1,
+                text: "Watskeburt in die bovenkamer? Wat is de vibe?",
+                options: [
+                    { text: "Ik ga lekkerder dan een raketje op dinsdag", icon: "party-popper", type: 'party' },
+                    { text: "Mijn ziel is een leegstaand kraakpand (honger)", icon: "frown", type: 'sad' },
+                    { text: "Mijn lever heeft een straatverbod, ik ben stuk", icon: "skull", type: 'hangover' },
+                    { text: "Gewoon fourageren, niet lullen maar vullen", icon: "utensils", type: 'neutral' },
+                ]
+            },
+            {
+                id: 2,
+                text: "Wie zijn de medeplichtigen in dit calorie-misdrijf?",
+                options: [
+                    { text: "Soloolo. Ik, mezelf en mijn vetpercentage", icon: "ghost", score: 'solo' },
+                    { text: "Een potentieel neukobject (moet chique doen)", icon: "heart", score: 'date' },
+                    { text: "De Squad. We gaan slopen en hopen.", icon: "pizza", score: 'friends' },
+                    { text: "Schoonouders. Red me, het is een gijzeling.", icon: "flame", score: 'inlaws' },
+                ]
+            },
+            {
+                id: 3,
+                text: "De Verboden Vrucht: Ananas. Praat met me.",
+                options: [
+                    { text: "JA MAN! Tropische verrassing in mijn giechel!", icon: "🍍", trait: 'pineapple_lover', isEmoji: true },
+                    { text: "Nee man, doe normaal, cultuurbarbaar.", icon: "🚫", trait: 'purist', isEmoji: true },
+                    { text: "Sst, alleen in het donker. Guilty pleasure.", icon: "👀", trait: 'secret_pineapple', isEmoji: true },
+                    { text: "Boeit me niet, pleur het in de oven.", icon: "🔥", trait: 'garbage_can', isEmoji: true },
+                ]
+            },
+            {
+                id: 4,
+                text: "Hoeveel haat je je eigen hartkleppen vandaag?",
+                options: [
+                    { text: "Ik ben eigenlijk een konijn in vermomming", icon: "🥗", health: 'high', isEmoji: true },
+                    { text: "Beetje balans, beetje dans, beetje sjans", icon: "⚖️", health: 'medium', isEmoji: true },
+                    { text: "Slib die aderen maar dicht, yolo swag.", icon: "🍔", health: 'low', isEmoji: true },
+                    { text: "Vet is de enige emotie die ik nog voel.", icon: "🥓", health: 'yolo', isEmoji: true },
+                ]
+            }
+        ];
+
+        const pizzaResults = {
+            marg: {
+                name: "Pizza Margherita",
+                desc: "Jij bent de beige trui van het universum. Veilig. Saai. Basis. Waarschijnlijk ben je bang voor smaak of heb je een date en wil je niet ruiken naar een kliko. Eet je deeg met tomatensaus, lafaard.",
+                img: "🧀",
+                color: "bg-yellow-100 border-yellow-500 text-yellow-900"
+            },
+            pepperoni: {
+                name: "Pizza Pepperoni",
+                desc: "De allemansvriend met pit. Net als je moeder. Grapje. Of niet. Jij wilt gewoon zout en vet in schijfjesvorm. Prima keuze, weinig risico, maximaal resultaat voor je dopamine-receptoren.",
+                img: "🍕",
+                color: "bg-red-100 border-red-600 text-red-900"
+            },
+            hawaii: {
+                name: "Pizza Hawaii",
+                desc: "Gefeliciteerd, je bent een culinaire anarchist. Je lacht in het gezicht van god en Italianen. Ananas op pizza is een oorlogsmisdaad, maar jij bent de dictator van je eigen maag. Respect voor de chaos.",
+                img: "🍍",
+                color: "bg-orange-100 border-orange-500 text-orange-900"
+            },
+            shoarma: {
+                name: "Pizza Shoarma",
+                desc: "Ah, de Geurvlag van Verdoemenis. Jij hebt of een kater van bijbelse proporties, of je hebt het leven opgegeven. Knoflooksaus is hier geen optie, het is levensbehoeften. Sterkte morgen op de wc.",
+                img: "🌯",
+                color: "bg-stone-200 border-stone-600 text-stone-900"
+            },
+            meatlovers: {
+                name: "Meatlovers",
+                desc: "De 'Ik Haat Dieren' special. Jij wilt gewoon dooie beesten stapelen op deeg. Je hartkleppen schreeuwen om genade, maar je smaakpapillen zingen het Wilhelmus. Eet smakelijk, carnivoor monster.",
+                img: "🍖",
+                color: "bg-rose-200 border-rose-600 text-rose-900"
+            },
+            veggi: {
+                name: "Veggie",
+                desc: "Kijk jou eens deugen. Je denkt dat je gezond doet, maar je eet nog steeds een frisbee van koolhydraten en gesmolten vet. Maar hey, er zit paprika op, dus je leeft praktisch voor altijd. Namasté, pik.",
+                img: "🥦",
+                color: "bg-green-100 border-green-600 text-green-900"
+            }
+        };
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            step: 0,
+            answers: {},
+            loading: false,
+            result: null
+        };
+
+        const app = document.getElementById('app');
+
+        // --- FUNCTIES ---
+
+        function calculateResult(finalAnswers) {
+            state.loading = true;
+            render();
+
+            setTimeout(() => {
+                let score = 'pepperoni';
+                const q1 = finalAnswers[0];
+                const q2 = finalAnswers[1];
+                const q3 = finalAnswers[2];
+                const q4 = finalAnswers[3];
+
+                if (q3.trait === 'pineapple_lover') score = 'hawaii';
+                else if (q1.type === 'hangover' || q4.health === 'yolo') score = 'shoarma';
+                else if (q4.health === 'high') score = 'veggi';
+                else if (q4.health === 'low' || q1.type === 'sad') score = 'meatlovers';
+                else if (q2.score === 'date' || q2.score === 'inlaws') score = 'marg';
+                else if (q1.type === 'party') score = 'pepperoni';
+
+                state.result = score;
+                state.loading = false;
+                render();
+            }, 2000);
+        }
+
+        function handleAnswer(option) {
+            state.answers[state.step] = option;
+            
+            if (state.step < questions.length - 1) {
+                state.step++;
+                render();
+            } else {
+                calculateResult(state.answers);
+            }
+        }
+
+        function resetQuiz() {
+            state.step = 0;
+            state.answers = {};
+            state.result = null;
+            state.loading = false;
+            render();
+        }
+
+        // --- RENDER FUNCTIES ---
+
+        function getHeaderHTML() {
+            return `
+                <div class="bg-black p-6 text-yellow-300 text-center border-b-4 border-black">
+                    <div class="flex justify-center mb-2">
+                        <i data-lucide="bomb" class="w-12 h-12 text-red-500 animate-pulse"></i>
+                    </div>
+                    <h1 class="text-4xl font-black uppercase tracking-tighter leading-none transform -skew-x-12">
+                        DE INTERGALACTISCHE<br/>DEEG DISCUS<br/>DESTINY KIEZER 9000
+                    </h1>
+                    <p class="text-pink-500 font-bold text-sm mt-2 uppercase tracking-widest bg-white inline-block px-2 transform skew-x-12">
+                        Nu met 100% meer sterrenstof
+                    </p>
+                </div>
+            `;
+        }
+
+        function getLoadingHTML() {
+            return `
+                <div class="flex flex-col items-center justify-center py-10 space-y-6">
+                    <div class="relative">
+                        <div class="w-24 h-24 border-8 border-black border-t-pink-500 rounded-full animate-spin"></div>
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl">
+                            🤪
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xl font-black animate-pulse uppercase">Logica downloaden...</p>
+                        <p class="text-sm font-bold text-pink-600 mt-2">
+                            "Verbinding maken met de Pizzagoden..."<br/>
+                            "Kaas wordt virtueel gesmolten..."
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getResultHTML() {
+            const resultData = pizzaResults[state.result];
+            return `
+                <div class="text-center space-y-6 animate-fade-in">
+                    <div class="p-8 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] ${resultData.color} transform transition hover:-translate-y-2 duration-300">
+                        <div class="text-8xl mb-6 animate-bounce drop-shadow-lg">${resultData.img}</div>
+                        <h2 class="text-3xl font-black mb-4 uppercase leading-none italic">${resultData.name}</h2>
+                        <p class="text-md font-bold leading-relaxed border-t-4 border-black pt-4">
+                            ${resultData.desc}
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col space-y-4 pt-4">
+                        <a href="https://www.dominos.nl/" target="_blank" rel="noreferrer"
+                           class="bg-pink-500 hover:bg-pink-400 text-white border-4 border-black text-xl font-black py-4 px-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-3 transition-all transform hover:-translate-y-1 active:translate-y-0 active:shadow-none">
+                            <i data-lucide="zap" fill="currentColor"></i> KNAL DIE BESTELLING ERIN
+                        </a>
+                        <button onclick="resetQuiz()"
+                           class="text-black hover:bg-black hover:text-white border-2 border-transparent hover:border-black font-bold py-2 px-4 transition-colors uppercase text-xs tracking-widest flex items-center justify-center">
+                            <i data-lucide="refresh-cw" class="w-3 h-3 mr-2"></i> Ik ben het oneens (jankbal)
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getQuestionHTML() {
+            const currentQ = questions[state.step];
+            const progress = (state.step / questions.length) * 100;
+            
+            // Generate options HTML
+            const optionsHTML = currentQ.options.map((opt, idx) => {
+                const iconHTML = opt.isEmoji 
+                    ? opt.icon 
+                    : `<i data-lucide="${opt.icon}"></i>`;
+                
+                // We use data-idx attribute to identify which option was clicked
+                return `
+                    <button onclick="handleOptionClick(${idx})"
+                        class="w-full group relative flex items-center p-4 border-4 border-black bg-white hover:bg-cyan-300 transition-all duration-100 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]">
+                        <span class="text-3xl mr-4 group-hover:scale-150 group-hover:rotate-12 transition-transform duration-200 flex items-center justify-center w-10">
+                            ${iconHTML}
+                        </span>
+                        <span class="font-bold text-lg text-black group-hover:italic">
+                            ${opt.text}
+                        </span>
+                    </button>
+                `;
+            }).join('');
+
+            return `
+                <div class="space-y-8">
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-black h-4 border-2 border-black p-0.5">
+                        <div class="bg-pink-500 h-full transition-all duration-300 relative" style="width: ${progress}%">
+                            <span class="absolute right-0 -top-2 text-2xl animate-bounce">🍕</span>
+                        </div>
+                    </div>
+                    
+                    <h2 class="text-2xl font-black text-black leading-none uppercase transform -rotate-1">
+                        ${currentQ.text}
+                    </h2>
+
+                    <div class="grid gap-4">
+                        ${optionsHTML}
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-xs font-black uppercase tracking-widest text-gray-400 mt-8 border-t-2 border-gray-200 pt-4">
+                        <span>Niveau ${state.step + 1} / ${questions.length}</span>
+                        <span class="flex items-center gap-1"><i data-lucide="siren" class="w-3 h-3"></i> Pas op: heet</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function render() {
+            let contentHTML = '';
+            
+            if (state.loading) {
+                contentHTML = getLoadingHTML();
+            } else if (state.result) {
+                contentHTML = getResultHTML();
+            } else {
+                contentHTML = getQuestionHTML();
+            }
+
+            app.innerHTML = `
+                ${getHeaderHTML()}
+                <div class="p-8">
+                    ${contentHTML}
+                </div>
+            `;
+
+            // Initialize icons for new content
+            lucide.createIcons();
+        }
+
+        // Global function to handle button clicks (called from HTML string)
+        window.handleOptionClick = (idx) => {
+            const currentQ = questions[state.step];
+            handleAnswer(currentQ.options[idx]);
+        };
+        
+        // Expose reset to window
+        window.resetQuiz = resetQuiz;
+
+        // Initial Render
+        render();
+
+    </script>
+</body>
+</html>
