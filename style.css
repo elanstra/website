@@ -24,20 +24,56 @@
             min-height: 100vh;
             padding: 2rem;
             
-            /* Flexbox om alles perfect in het midden te zetten */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
             /* Subtiel patroontje voor textuur */
             background-image: radial-gradient(rgba(26, 60, 52, 0.03) 1px, transparent 1px);
             background-size: 20px 20px;
+        }
+
+        /* Navigatie (HERSTELD) */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 5rem;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        .navbar__brand {
+            font-family: var(--font-serif);
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .navbar__btn {
+            text-decoration: none;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(26, 60, 52, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(26, 60, 52, 0.1);
+        }
+
+        .navbar__btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(26, 60, 52, 0.1);
         }
 
         /* Hoofd Content */
         .hub {
             max-width: 1100px;
             width: 100%;
+            margin: 0 auto;
         }
 
         .hub__header {
@@ -87,7 +123,6 @@
         /* Grid */
         .hub__grid {
             display: grid;
-            /* AANGEPAST: minmax was 450px, nu 280px voor mobiel */
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2.5rem;
         }
@@ -106,7 +141,7 @@
             border: 1px solid rgba(255,255,255,0.8);
             position: relative;
             overflow: hidden;
-            min-height: 250px; /* Zorgt voor consistente hoogte */
+            min-height: 250px;
         }
 
         .tool-card:hover {
@@ -183,26 +218,35 @@
 
         @media (max-width: 600px) {
             body {
-                display: block; /* Voorkomt layout issues op kleine schermen */
                 padding: 1.5rem;
             }
             
             .hub {
-                padding-top: 2rem;
+                padding-top: 1rem;
             }
 
             .hub__header {
                 margin-bottom: 3rem;
             }
+            
+            /* Navbar adjustments voor mobiel */
+            .navbar {
+                margin-bottom: 3rem;
+            }
+            .navbar__brand {
+                font-size: 1.5rem;
+            }
+            .navbar__btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
 
             .tool-card {
-                flex-direction: column-reverse; /* Icoon boven, tekst onder op mobiel? Of andersom? */
-                align-items: flex-start; /* Links uitlijnen */
+                flex-direction: column-reverse;
+                align-items: flex-start;
                 padding: 2rem;
             }
             
-            /* Op mobiel zetten we het icoon rechtsboven absoluut, 
-               zodat de tekstruimte maximaal is */
             .tool-card__icon-container {
                 position: absolute;
                 top: 1.5rem;
@@ -223,6 +267,6 @@
             
             .tool-card__title {
                 font-size: 1.75rem;
-                padding-right: 60px; /* Ruimte voor het icoon */
+                padding-right: 60px;
             }
         }
