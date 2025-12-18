@@ -18,6 +18,10 @@
     padding: 0;
 }
 
+.navbar__link {
+  visibility: hidden;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
