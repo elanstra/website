@@ -1,5 +1,5 @@
-        :root {
-            /* Kleurenpalet gebaseerd op 'Calm/Premium' vibe */
+  :root {
+            /* Kleurenpalet */
             --bg-color: #f2f8d9;
             --text-color: #1a3c34;
             --card-bg: #ffffff;
@@ -29,7 +29,7 @@
             background-size: 20px 20px;
         }
 
-        /* Navigatie (HERSTELD) */
+        /* Navigatie */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -42,6 +42,7 @@
             width: 100%;
         }
 
+        /* AANGEPAST: Flexbox toegevoegd om logo en tekst netjes uit te lijnen */
         .navbar__brand {
             font-family: var(--font-serif);
             font-size: 1.75rem;
@@ -49,6 +50,16 @@
             letter-spacing: -0.5px;
             color: var(--text-color);
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Ruimte tussen logo en tekst */
+        }
+
+        /* Styling voor het logo plaatje */
+        .navbar__logo {
+            height: 45px; /* Niet te groot maken */
+            width: auto;
+            display: block;
         }
 
         .navbar__btn {
@@ -229,13 +240,18 @@
                 margin-bottom: 3rem;
             }
             
-            /* Navbar adjustments voor mobiel */
             .navbar {
                 margin-bottom: 3rem;
             }
-            .navbar__brand {
-                font-size: 1.5rem;
+            
+            /* Logo iets kleiner op mobiel */
+            .navbar__logo {
+                height: 35px;
             }
+            .navbar__brand {
+                font-size: 1.4rem;
+            }
+            
             .navbar__btn {
                 padding: 0.6rem 1rem;
                 font-size: 0.8rem;
