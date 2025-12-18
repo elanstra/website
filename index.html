@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Navigatie: Terug van weggeweest -->
+    <nav class="navbar">
+        <a href="#" class="navbar__brand">Sven's Lab</a>
+        <a href="#" class="navbar__btn">Doneer een biertje 🍺</a>
+    </nav>
+
     <main class="hub">
         <header class="hub__header">
             <h1 class="hub__title">
@@ -21,7 +27,7 @@
             </p>
         </header>
 
-        <!-- De grid is nu leeg, wordt gevuld door JS -->
+        <!-- De grid wordt gevuld door JS -->
         <div class="hub__grid" id="tools-grid"></div>
     </main>
 
@@ -44,7 +50,7 @@
             }
         ];
 
-        // LOGICA: Dit bouwt de HTML
+        // LOGICA
         const gridContainer = document.getElementById('tools-grid');
 
         const cardsHTML = tools.map(tool => `
