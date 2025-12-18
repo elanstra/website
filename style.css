@@ -1,92 +1,209 @@
 :root {
-    --bg-dark: #0f0c29;
-    --bg-gradient: linear-gradient(300deg, #0f0c29, #302b63, #24243e);
-    --card-bg: rgba(255, 255, 255, 0.05);
-    --text: #ffffff;
-    --muted: #b3b3b3;
-    --accent: #ff007a;
-    --accent-glow: rgba(255, 0, 122, 0.6);
-    --font-main: "Fredoka", sans-serif;
+    /* Kleurenpalet gebaseerd op het voorbeeld */
+    --bg-color: #f2f8d9; /* Zacht crème-geel/groen */
+    --text-color: #1a3c34; /* Donkergroen/zwart voor contrast */
+    --card-bg: #ffffff;
+    --accent-color: #7a9a4e; /* Een accentgroen */
+    --btn-bg: #ffffff;
+    --btn-text: #1a3c34;
+
+    /* Fonts */
+    --font-sans: 'DM Sans', sans-serif;
+    --font-serif: 'Playfair Display', serif;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 body {
-    background: var(--bg-gradient);
-    background-size: 180% 180%;
-    animation: gradient-animation 15s ease infinite;
-    color: var(--text);
-    font-family: var(--font-main);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-sans);
+    line-height: 1.5;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
     padding: 2rem;
+    /* Achtergrond subtiel patroon geven, optioneel */
+    background-image: radial-gradient(rgba(26, 60, 52, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
 }
 
-@keyframes gradient-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+/* Navigatiebalk */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-bottom: 4rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.hub { max-width: 1000px; width: 100%; align-self: center; }
+.navbar__links {
+    display: flex;
+    gap: 2rem;
+}
 
-.hub__header { text-align: center; margin-bottom: 4rem; }
+.navbar__link {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.navbar__brand {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.navbar__btn {
+    text-decoration: none;
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
+    padding: 0.7rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.navbar__btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+
+/* Hoofd content */
+.hub {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.hub__header {
+    text-align: center;
+    margin-bottom: 5rem;
+}
 
 .hub__title {
-    font-size: 3.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(to right, #ff007a, #ffd700);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+}
+
+.hub__title em {
+    font-style: italic;
+    /* Optioneel: een andere kleur voor het nadruk-deel */
+    /* color: var(--accent-color); */
 }
 
 .hub__subtitle {
-    color: var(--muted);
-    font-size: 1.2rem;
-    letter-spacing: 1px;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    color: var(--text-color);
+    opacity: 0.8;
 }
 
+/* Grid met kaarten */
 .hub__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 2rem;
 }
 
 .tool-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 2rem;
+    background-color: var(--card-bg);
+    border-radius: 24px;
+    padding: 2.5rem;
     text-decoration: none;
     color: inherit;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    justify-content: space-between;
+    align-items: flex-start;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.5);
 }
 
 .tool-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    border-color: var(--accent);
-    box-shadow: 0 10px 30px var(--accent-glow);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+}
+
+.tool-card__content {
+    flex: 1;
+    padding-right: 2rem;
+}
+
+.tool-card__tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+}
+
+.tool-card__title {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+.tool-card__desc {
+    color: var(--text-color);
+    opacity: 0.7;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.tool-card__icon-container {
+    background-color: var(--bg-color);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .tool-card__icon {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-    transition: transform 0.3s ease;
+    font-size: 2.5rem;
 }
 
-.tool-card:hover .tool-card__icon { transform: scale(1.2) rotate(10deg); }
-.tool-card__title { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.2; }
-.tool-card__desc { color: var(--muted); font-size: 1rem; }
-
-@media (max-width: 600px) {
-    .hub__title { font-size: 2.5rem; }
+/* Mobiele aanpassingen */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .navbar__links {
+        display: none; /* Voor nu even verbergen op mobiel */
+    }
+    .hub__title {
+        font-size: 2.5rem;
+    }
+    .tool-card {
+        flex-direction: column-reverse;
+        align-items: center;
+        text-align: center;
+    }
+    .tool-card__content {
+        padding-right: 0;
+        margin-top: 1.5rem;
+    }
 }
