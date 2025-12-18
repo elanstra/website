@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DE INTERGALACTISCHE PIZZA KIEZER</title>
-    <!-- Tailwind CSS voor de looks -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons voor de plaatjes -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* Custom animaties die Tailwind niet standaard heeft */
@@ -28,19 +26,15 @@
 </head>
 <body class="min-h-screen bg-yellow-300 font-mono flex items-center justify-center p-4 selection:bg-pink-500 selection:text-white">
 
-    <!-- Achtergrond Chaos -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden opacity-20">
         <div class="absolute top-10 left-10 text-9xl animate-bounce">🍕</div>
         <div class="absolute bottom-20 right-20 text-9xl animate-pulse">🔥</div>
         <div class="absolute top-1/2 left-1/4 text-8xl animate-spin-slow">💩</div>
     </div>
 
-    <!-- Hoofd Container -->
     <div id="app" class="max-w-lg w-full bg-white border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative z-10 transform rotate-1 hover:rotate-0 transition-transform duration-300">
-        <!-- Content wordt hierin gerenderd door JS -->
-    </div>
+        </div>
 
-    <!-- Footer Disclaimer -->
     <div class="fixed bottom-2 right-2 text-[10px] font-bold text-yellow-600 opacity-50 rotate-180">
         Gemaakt door een AI op cafeïne
     </div>
@@ -53,40 +47,114 @@
                 id: 1,
                 text: "Watskeburt in die bovenkamer? Wat is de vibe?",
                 options: [
-                    { text: "Ik ga lekkerder dan een raketje op dinsdag", icon: "party-popper", type: 'party' },
-                    { text: "Mijn ziel is een leegstaand kraakpand (honger)", icon: "frown", type: 'sad' },
-                    { text: "Mijn lever heeft een straatverbod, ik ben stuk", icon: "skull", type: 'hangover' },
-                    { text: "Gewoon fourageren, niet lullen maar vullen", icon: "utensils", type: 'neutral' },
+                    { 
+                        text: "Ik ga lekkerder dan een raketje op dinsdag", 
+                        icon: "party-popper", 
+                        // Party boost vooral Pepperoni en Hawaii (chaos)
+                        weights: { pepperoni: 4, hawaii: 2, marg: 0 } 
+                    },
+                    { 
+                        text: "Mijn ziel is een leegstaand kraakpand (honger)", 
+                        icon: "frown", 
+                        // Honger = Vlees
+                        weights: { meatlovers: 4, shoarma: 3, pepperoni: 1 } 
+                    },
+                    { 
+                        text: "Mijn lever heeft een straatverbod, ik ben stuk", 
+                        icon: "skull", 
+                        // Kater = Shoarma wint bijna altijd
+                        weights: { shoarma: 6, meatlovers: 2 } 
+                    },
+                    { 
+                        text: "Gewoon fourageren, niet lullen maar vullen", 
+                        icon: "utensils", 
+                        // Neutraal verdeeld
+                        weights: { marg: 1, pepperoni: 3, veggi: 1 } 
+                    },
                 ]
             },
             {
                 id: 2,
                 text: "Wie zijn de medeplichtigen in dit calorie-misdrijf?",
                 options: [
-                    { text: "Soloolo. Ik, mezelf en mijn vetpercentage", icon: "ghost", score: 'solo' },
-                    { text: "Een potentieel neukobject (moet chique doen)", icon: "heart", score: 'date' },
-                    { text: "De Squad. We gaan slopen en hopen.", icon: "pizza", score: 'friends' },
-                    { text: "Schoonouders. Red me, het is een gijzeling.", icon: "flame", score: 'inlaws' },
+                    { 
+                        text: "Soloolo. Ik, mezelf en mijn vetpercentage", 
+                        icon: "ghost", 
+                        // Solo mag stinken
+                        weights: { shoarma: 3, meatlovers: 3, hawaii: 2 } 
+                    },
+                    { 
+                        text: "Een spannende date (ik moet me gedragen)", 
+                        icon: "heart", 
+                        // Date geeft minder punten aan Marg dan eerst (was 5, nu 3)
+                        // Pepperoni krijgt ook punten (veilige 2e keus)
+                        weights: { marg: 3, veggi: 2, pepperoni: 2, shoarma: -5 } 
+                    },
+                    { 
+                        text: "De Squad. We gaan slopen en hopen.", 
+                        icon: "pizza", 
+                        weights: { pepperoni: 5, meatlovers: 3, hawaii: 2 } 
+                    },
+                    { 
+                        text: "Schoonouders. Red me, het is een gijzeling.", 
+                        icon: "flame", 
+                        // Schoonouders blijven saai
+                        weights: { marg: 4, veggi: 2 } 
+                    },
                 ]
             },
             {
                 id: 3,
                 text: "De Verboden Vrucht: Ananas. Praat met me.",
                 options: [
-                    { text: "JA MAN! Tropische verrassing in mijn giechel!", icon: "🍍", trait: 'pineapple_lover', isEmoji: true },
-                    { text: "Nee man, doe normaal, cultuurbarbaar.", icon: "🚫", trait: 'purist', isEmoji: true },
-                    { text: "Sst, alleen in het donker. Guilty pleasure.", icon: "👀", trait: 'secret_pineapple', isEmoji: true },
-                    { text: "Boeit me niet, pleur het in de oven.", icon: "🔥", trait: 'garbage_can', isEmoji: true },
+                    { 
+                        text: "JA MAN! Tropische verrassing in mijn giechel!", 
+                        icon: "🍍", isEmoji: true,
+                        // Als je dit kiest, win je bijna sws Hawaii
+                        weights: { hawaii: 12 } 
+                    },
+                    { 
+                        text: "Nee man, doe normaal, cultuurbarbaar.", 
+                        icon: "🚫", isEmoji: true,
+                        weights: { marg: 1, pepperoni: 1, meatlovers: 2, shoarma: 1, hawaii: -100 } 
+                    },
+                    { 
+                        text: "Sst, alleen in het donker. Guilty pleasure.", 
+                        icon: "👀", isEmoji: true,
+                        weights: { hawaii: 4, pepperoni: 1 } 
+                    },
+                    { 
+                        text: "Boeit me niet, pleur het in de oven.", 
+                        icon: "🔥", isEmoji: true,
+                        weights: { shoarma: 2, meatlovers: 2 } 
+                    },
                 ]
             },
             {
                 id: 4,
                 text: "Hoeveel haat je je eigen hartkleppen vandaag?",
                 options: [
-                    { text: "Ik ben eigenlijk een konijn in vermomming", icon: "🥗", health: 'high', isEmoji: true },
-                    { text: "Beetje balans, beetje dans, beetje sjans", icon: "⚖️", health: 'medium', isEmoji: true },
-                    { text: "Slib die aderen maar dicht, yolo swag.", icon: "🍔", health: 'low', isEmoji: true },
-                    { text: "Vet is de enige emotie die ik nog voel.", icon: "🥓", health: 'yolo', isEmoji: true },
+                    { 
+                        text: "Ik ben eigenlijk een konijn in vermomming", 
+                        icon: "🥗", isEmoji: true,
+                        // Dikke bonus voor Veggi, anders wint ie nooit
+                        weights: { veggi: 8, marg: 1 } 
+                    },
+                    { 
+                        text: "Beetje balans, beetje dans, beetje sjans", 
+                        icon: "⚖️", isEmoji: true,
+                        weights: { marg: 2, pepperoni: 2, veggi: 2 } 
+                    },
+                    { 
+                        text: "Slib die aderen maar dicht, yolo swag.", 
+                        icon: "🍔", isEmoji: true,
+                        weights: { meatlovers: 5, shoarma: 3, pepperoni: 1 } 
+                    },
+                    { 
+                        text: "Vet is de enige emotie die ik nog voel.", 
+                        icon: "🥓", isEmoji: true,
+                        weights: { shoarma: 5, meatlovers: 5 } 
+                    },
                 ]
             }
         ];
@@ -112,7 +180,7 @@
             },
             shoarma: {
                 name: "Pizza Shoarma",
-                desc: "Ah, de Geurvlag van Verdoemenis. Jij hebt of een kater van bijbelse proporties, of je hebt het leven opgegeven. Knoflooksaus is hier geen optie, het is levensbehoeften. Sterkte morgen op de wc.",
+                desc: "Ah, de Geurvlag van Verdoemenis. Jij hebt of een kater van bijbelse proporties, of je hebt het leven opgegeven. Knoflooksaus is hier geen optie, het is een levensbehoefte. Sterkte morgen op de wc.",
                 img: "🌯",
                 color: "bg-stone-200 border-stone-600 text-stone-900"
             },
@@ -133,7 +201,7 @@
         // --- STATE MANAGEMENT ---
         let state = {
             step: 0,
-            answers: {},
+            answers: [],
             loading: false,
             result: null
         };
@@ -147,20 +215,34 @@
             render();
 
             setTimeout(() => {
-                let score = 'pepperoni';
-                const q1 = finalAnswers[0];
-                const q2 = finalAnswers[1];
-                const q3 = finalAnswers[2];
-                const q4 = finalAnswers[3];
+                let scoreboard = {
+                    marg: 0,
+                    pepperoni: 0,
+                    hawaii: 0,
+                    shoarma: 0,
+                    meatlovers: 0,
+                    veggi: 0
+                };
 
-                if (q3.trait === 'pineapple_lover') score = 'hawaii';
-                else if (q1.type === 'hangover' || q4.health === 'yolo') score = 'shoarma';
-                else if (q4.health === 'high') score = 'veggi';
-                else if (q4.health === 'low' || q1.type === 'sad') score = 'meatlovers';
-                else if (q2.score === 'date' || q2.score === 'inlaws') score = 'marg';
-                else if (q1.type === 'party') score = 'pepperoni';
+                // Punten optellen
+                finalAnswers.forEach(answer => {
+                    if (answer.weights) {
+                        for (const [pizza, points] of Object.entries(answer.weights)) {
+                            if (scoreboard[pizza] !== undefined) {
+                                scoreboard[pizza] += points;
+                            }
+                        }
+                    }
+                });
 
-                state.result = score;
+                // Sorteren hoog naar laag
+                const sortedPizzas = Object.entries(scoreboard).sort((a, b) => b[1] - a[1]);
+                let winner = sortedPizzas[0][0];
+
+                console.log("Eindstand:", scoreboard);
+                console.log("Winnaar:", winner);
+
+                state.result = winner;
                 state.loading = false;
                 render();
             }, 2000);
@@ -179,7 +261,7 @@
 
         function resetQuiz() {
             state.step = 0;
-            state.answers = {};
+            state.answers = [];
             state.result = null;
             state.loading = false;
             render();
@@ -197,7 +279,7 @@
                         DE INTERGALACTISCHE<br/>DEEG DISCUS<br/>DESTINY KIEZER 9000
                     </h1>
                     <p class="text-pink-500 font-bold text-sm mt-2 uppercase tracking-widest bg-white inline-block px-2 transform skew-x-12">
-                        Nu met 100% meer sterrenstof
+                        Nu met 100% meer logica
                     </p>
                 </div>
             `;
@@ -213,10 +295,10 @@
                         </div>
                     </div>
                     <div class="text-center">
-                        <p class="text-xl font-black animate-pulse uppercase">Logica downloaden...</p>
+                        <p class="text-xl font-black animate-pulse uppercase">Algoritme aanlingeren...</p>
                         <p class="text-sm font-bold text-pink-600 mt-2">
-                            "Verbinding maken met de Pizzagoden..."<br/>
-                            "Kaas wordt virtueel gesmolten..."
+                            "Punten tellen..."<br/>
+                            "Jury omkopen..."
                         </p>
                     </div>
                 </div>
@@ -253,13 +335,11 @@
             const currentQ = questions[state.step];
             const progress = (state.step / questions.length) * 100;
             
-            // Generate options HTML
             const optionsHTML = currentQ.options.map((opt, idx) => {
                 const iconHTML = opt.isEmoji 
                     ? opt.icon 
                     : `<i data-lucide="${opt.icon}"></i>`;
                 
-                // We use data-idx attribute to identify which option was clicked
                 return `
                     <button onclick="handleOptionClick(${idx})"
                         class="w-full group relative flex items-center p-4 border-4 border-black bg-white hover:bg-cyan-300 transition-all duration-100 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]">
@@ -275,7 +355,6 @@
 
             return `
                 <div class="space-y-8">
-                    <!-- Progress Bar -->
                     <div class="w-full bg-black h-4 border-2 border-black p-0.5">
                         <div class="bg-pink-500 h-full transition-all duration-300 relative" style="width: ${progress}%">
                             <span class="absolute right-0 -top-2 text-2xl animate-bounce">🍕</span>
@@ -316,20 +395,16 @@
                 </div>
             `;
 
-            // Initialize icons for new content
             lucide.createIcons();
         }
 
-        // Global function to handle button clicks (called from HTML string)
         window.handleOptionClick = (idx) => {
             const currentQ = questions[state.step];
             handleAnswer(currentQ.options[idx]);
         };
         
-        // Expose reset to window
         window.resetQuiz = resetQuiz;
 
-        // Initial Render
         render();
 
     </script>
