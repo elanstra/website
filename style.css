@@ -290,3 +290,17 @@
                 padding-right: 60px;
             }
         }
+
+/* --- Toegankelijkheid & Focus --- */
+.navbar__brand:focus-visible,
+.navbar__btn:focus-visible {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 4px;
+}
+
+.tool-card:focus-visible {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 8px;
+    transform: translateY(-8px);
+    box-shadow: 0 20px 50px rgba(26, 60, 52, 0.08);
+}
