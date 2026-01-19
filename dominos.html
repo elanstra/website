@@ -244,7 +244,7 @@
 
                 state.result = winner;
                 state.loading = false;
-                render();
+                render(true);
             }, 2000);
         }
 
@@ -253,7 +253,7 @@
             
             if (state.step < questions.length - 1) {
                 state.step++;
-                render();
+                render(true);
             } else {
                 calculateResult(state.answers);
             }
@@ -355,13 +355,13 @@
 
             return `
                 <div class="space-y-8">
-                    <div class="w-full bg-black h-4 border-2 border-black p-0.5">
+                    <div class="w-full bg-black h-4 border-2 border-black p-0.5" role="progressbar" aria-label="Voortgang" aria-valuenow="${Math.round(progress)}" aria-valuemin="0" aria-valuemax="100">
                         <div class="bg-pink-500 h-full transition-all duration-300 relative" style="width: ${progress}%">
                             <span class="absolute right-0 -top-2 text-2xl animate-bounce">🍕</span>
                         </div>
                     </div>
                     
-                    <h2 class="text-2xl font-black text-black leading-none uppercase transform -rotate-1">
+                    <h2 class="text-2xl font-black text-black leading-none uppercase transform -rotate-1" tabindex="-1">
                         ${currentQ.text}
                     </h2>
 
@@ -377,7 +377,7 @@
             `;
         }
 
-        function render() {
+        function render(shouldFocus = false) {
             let contentHTML = '';
             
             if (state.loading) {
@@ -396,6 +396,14 @@
             `;
 
             lucide.createIcons();
+
+            if (shouldFocus) {
+                const focusTarget = app.querySelector('h2') || app.querySelector('.p-8');
+                if (focusTarget) {
+                    focusTarget.setAttribute('tabindex', '-1');
+                    focusTarget.focus();
+                }
+            }
         }
 
         window.handleOptionClick = (idx) => {
