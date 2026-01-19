@@ -3,166 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beste Vakantieweken Nederland - Data Analyse</title>
+    <title>ZomerPlanner - Vind jouw ideale week</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FIX: Specifieke UMD versie van Chart.js gebruikt voor stabiliteit -->
+    <!-- Chart.js UMD version for stability -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        /* Import Quicksand for that friendly, rounded look */
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Quicksand', sans-serif; 
+            background-color: #FFF8F4; /* Warm Cream Background */
+        }
+        
         .chart-container {
             position: relative;
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            height: 400px;
+            height: 350px;
+            min-height: 350px; /* Force height */
         }
+
+        /* Friendly, chunky sliders */
         input[type=range] {
             -webkit-appearance: none; 
+            width: 100%; 
             background: transparent; 
         }
+        
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
+            height: 28px;
+            width: 28px;
             border-radius: 50%;
-            background: #d97706; /* amber-600 */
+            background: #FF8BA7; /* Soft Coral */
             cursor: pointer;
-            margin-top: -8px; 
+            margin-top: -10px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 4px solid white;
+            transition: transform 0.1s ease;
         }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
-            height: 4px;
+            height: 8px;
             cursor: pointer;
-            background: #e5e7eb;
-            border-radius: 2px;
+            background: #EAEAEA;
+            border-radius: 999px;
+        }
+
+        /* Specific tracks for different sliders */
+        #input-temp::-webkit-slider-runnable-track { background: #FFE5D9; }
+        #input-sun::-webkit-slider-runnable-track { background: #FFF4C3; }
+        #input-rain::-webkit-slider-runnable-track { background: #D0F4F7; }
+
+        /* Smooth cards */
+        .soft-card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 10px 40px -10px rgba(200, 180, 170, 0.2);
+            border: 1px solid rgba(255,255,255,0.8);
         }
     </style>
-    <!-- Chosen Palette: Warm Neutrals & Summer Accents. Background: Stone-50. Primary: Amber-600 (Sun). Secondary: Sky-600 (Clear Days). Text: Slate-800. -->
-    <!-- Application Structure Plan: 
-         1. Hero Section: Sets context regarding climatology vs prediction.
-         2. Preference Engine (Interaction): Users adjust sliders for Heat, Sun, and Dryness. This makes the data personal.
-         3. Dynamic Top 3 Result: Immediately calculates and shows the best weeks based on user weights.
-         4. Main Visualization (Chart.js): A combo chart showing the correlation between Temp, Rain, and Sun hours across weeks 22-35.
-         5. Seasonal Breakdown: Detailed text/cards comparing Early, Peak, and Late summer.
-         6. Regional Toggle: A simple switch to see differences between Coast and Inland weather.
+    <!-- Chosen Palette: "Friendly Pastel Pop" 
+         Bg: Cream (#FFF8F4). 
+         Text: Warm Grey (#4A4A4A). 
+         Accents: Coral (#FF8BA7), Sunny Yellow (#FFD93D), Soft Teal (#6BCB77).
     -->
-    <!-- Visualization & Content Choices:
-         - Chart.js Combo Chart: Best to compare different units (Temp in C vs Sun in Hours) on one timeline. 
-         - Logic: JS array with KNMI 30-year average approximations per week.
-         - Interaction: Sliders update the "Score" per week, re-ordering the Top 3 display.
-         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    <!-- Application Structure Plan:
+         - Chart restored with visible axes.
+         - Footer restored with detailed sources.
+         - Titles in sentence case (Dutch style).
     -->
 </head>
-<body class="bg-stone-50 text-slate-800">
+<body class="text-stone-700 flex flex-col min-h-screen">
 
     <!-- Navbar -->
-    <nav class="bg-white shadow-sm border-b border-stone-200 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl">🇳🇱</span>
-                    <h1 class="font-bold text-xl tracking-tight text-slate-900">ZomerPlanner <span class="text-amber-600 font-light">NL</span></h1>
-                </div>
-                <div class="text-sm font-medium text-slate-500 hidden sm:block">Gebaseerd op KNMI Climatologie (1991-2020)</div>
+    <nav class="sticky top-4 z-50 mx-4 md:mx-auto max-w-4xl">
+        <div class="bg-white/80 backdrop-blur-md rounded-full px-6 py-3 shadow-sm border border-white/50 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-yellow-400 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm">NL</div>
+                <h1 class="font-bold text-xl tracking-tight text-stone-800">Zomer<span class="text-[#FF8BA7]">Planner</span></h1>
+            </div>
+            <div class="text-xs font-semibold text-stone-400 hidden sm:block bg-stone-100 px-3 py-1 rounded-full">
+                KNMI data '91-'20
             </div>
         </div>
     </nav>
 
-    <!-- Hero / Intro -->
-    <header class="max-w-4xl mx-auto px-4 py-12 text-center">
-        <h2 class="text-3xl md:text-5xl font-bold mb-4 text-slate-900">Wanneer is de Nederlandse zomer op zijn best?</h2>
-        <p class="text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            Het weer in Nederland is wisselvallig, maar statistieken liegen niet. 
-            Gebruik deze tool om op basis van historische data de <span class="font-semibold text-amber-600">3 beste weken</span> te vinden voor jouw ideale vakantie.
+    <!-- Hero -->
+    <header class="max-w-3xl mx-auto px-4 py-12 text-center mt-4">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-stone-800 leading-tight">
+            Vind jouw perfecte <br>
+            <span class="text-[#FF8BA7] relative inline-block">
+                vakantieweek
+                <svg class="absolute w-full h-3 -bottom-1 left-0 text-yellow-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" /></svg>
+            </span>
+        </h2>
+        <p class="text-lg text-stone-500 max-w-lg mx-auto leading-relaxed">
+            Niet iedereen houdt van 30 graden. Verschuif de regelaars en ontdek wanneer de Nederlandse zomer bij <strong>jou</strong> past.
         </p>
     </header>
 
-    <!-- Main Application Container -->
-    <main class="max-w-6xl mx-auto px-4 pb-20 space-y-12">
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 space-y-10 flex-grow">
 
-        <!-- SECTION 1: Preference Calculator -->
-        <section class="bg-white rounded-2xl shadow-lg border border-stone-100 overflow-hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
+        <!-- Calculator Card -->
+        <section class="soft-card p-6 md:p-10 relative overflow-hidden">
+            <!-- Decorative blobs -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-yellow-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10">
                 
-                <!-- Controls -->
-                <div class="lg:col-span-5 p-8 bg-stone-100/50 border-r border-stone-100 flex flex-col justify-center">
-                    <h3 class="text-xl font-bold mb-2">Jouw Voorkeuren</h3>
-                    <p class="text-sm text-slate-500 mb-8">Wat vind jij het belangrijkst? Verschuif de regelaars.</p>
-
-                    <div class="space-y-8">
-                        <!-- Slider: Heat -->
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="font-semibold text-slate-700 flex items-center gap-2">
-                                    🌡️ Temperatuur
-                                </label>
-                                <span id="val-temp" class="text-amber-600 font-bold">50%</span>
-                            </div>
-                            <input type="range" id="input-temp" min="0" max="100" value="50" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
-                            <p class="text-xs text-slate-400 mt-1">Links: Koeler is oké • Rechts: Hittegolf graag</p>
+                <!-- Inputs -->
+                <div class="flex flex-col justify-center space-y-8">
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="font-bold text-lg text-stone-700">🌡️ Temperatuur</label>
+                            <span id="val-temp" class="text-sm font-bold bg-[#FFE5D9] text-[#D96C6C] px-3 py-1 rounded-full">50%</span>
                         </div>
+                        <input type="range" id="input-temp" min="0" max="100" value="50">
+                        <p class="text-xs font-medium text-stone-400 mt-2 pl-1">Liever fris <span class="float-right">Hittegolf!</span></p>
+                    </div>
 
-                        <!-- Slider: Sun -->
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="font-semibold text-slate-700 flex items-center gap-2">
-                                    ☀️ Zonuren
-                                </label>
-                                <span id="val-sun" class="text-amber-600 font-bold">50%</span>
-                            </div>
-                            <input type="range" id="input-sun" min="0" max="100" value="50" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
-                            <p class="text-xs text-slate-400 mt-1">Links: Bewolking mag • Rechts: Maximale zon</p>
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="font-bold text-lg text-stone-700">☀️ Zonuren</label>
+                            <span id="val-sun" class="text-sm font-bold bg-[#FFF4C3] text-[#B89C26] px-3 py-1 rounded-full">50%</span>
                         </div>
+                        <input type="range" id="input-sun" min="0" max="100" value="50">
+                        <p class="text-xs font-medium text-stone-400 mt-2 pl-1">Wolkje mag <span class="float-right">Bakken</span></p>
+                    </div>
 
-                        <!-- Slider: Rain -->
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="font-semibold text-slate-700 flex items-center gap-2">
-                                    ☔ Droogte
-                                </label>
-                                <span id="val-rain" class="text-sky-600 font-bold">50%</span>
-                            </div>
-                            <input type="range" id="input-rain" min="0" max="100" value="50" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
-                            <p class="text-xs text-slate-400 mt-1">Links: Een buitje is prima • Rechts: Gortdroog</p>
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="font-bold text-lg text-stone-700">☔ Droogte</label>
+                            <span id="val-rain" class="text-sm font-bold bg-[#D0F4F7] text-[#4AA3A8] px-3 py-1 rounded-full">50%</span>
                         </div>
+                        <input type="range" id="input-rain" min="0" max="100" value="50">
+                        <p class="text-xs font-medium text-stone-400 mt-2 pl-1">Buitje is oké <span class="float-right">Sahara</span></p>
                     </div>
                 </div>
 
-                <!-- Results Display -->
-                <div class="lg:col-span-7 p-8 flex flex-col items-center justify-center bg-white relative">
-                    <div class="absolute top-4 right-4 text-xs font-mono text-stone-300">LIVE CALCULATIE</div>
+                <!-- Results -->
+                <div class="bg-stone-50 rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center text-center border border-stone-100">
+                    <h3 class="text-sm font-bold text-stone-400 uppercase tracking-widest mb-6">Jouw top 3 weken</h3>
                     
-                    <h3 class="text-lg font-medium text-slate-500 mb-6 uppercase tracking-wider">Statistisch Beste Weken</h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-                        <!-- Rank 2 -->
-                        <div class="order-2 sm:order-1 flex flex-col items-center justify-end pb-4">
-                            <div class="text-sm font-bold text-slate-400 mb-2">#2</div>
-                            <div class="bg-stone-50 border-2 border-stone-100 rounded-xl p-6 w-full text-center hover:border-amber-200 transition-colors">
-                                <span class="block text-3xl font-bold text-slate-700" id="rank-2-week">Week --</span>
-                                <span class="text-xs text-slate-500" id="rank-2-date">--</span>
+                    <div class="w-full space-y-4">
+                        <!-- #1 Winner -->
+                        <div class="bg-white rounded-2xl p-4 shadow-[0_8px_20px_rgb(0,0,0,0.06)] border border-yellow-100 relative transform hover:scale-105 transition-transform duration-300">
+                            <div class="absolute -top-3 -right-3 bg-yellow-400 text-white rounded-full p-2 shadow-sm animate-bounce">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.699-3.181a1 1 0 011.827.954L17.412 6.53l-1.018 2.036 1.939.969a1 1 0 11-.902 1.788l-1.94-.97-.97 1.94a1 1 0 01-1.788-.902l.969-1.939-2.036 1.018L10 13.677V15a1 1 0 11-2 0v-1.323l-3.954 1.582-1.699 3.181a1 1 0 01-1.827-.954l1.066-2.774-1.018-2.036-1.939-.969a1 1 0 01.902-1.788l1.94.97.97-1.94a1 1 0 011.788.902l-.969 1.939 2.036-1.018L10 4.323V3a1 1 0 011-1z" clip-rule="evenodd" />
+                                </svg>
                             </div>
+                            <span class="text-4xl font-extrabold text-stone-800 block" id="rank-1-week">Week --</span>
+                            <span class="text-[#FF8BA7] font-bold block mb-1" id="rank-1-date">...</span>
+                            <span class="text-xs text-stone-400 block" id="rank-1-desc">...</span>
                         </div>
 
-                        <!-- Rank 1 -->
-                        <div class="order-1 sm:order-2 flex flex-col items-center">
-                            <div class="text-sm font-bold text-amber-500 mb-2 animate-bounce">🏆 #1 KEUZE</div>
-                            <div class="bg-amber-50 border-2 border-amber-200 shadow-amber-100 shadow-xl rounded-xl p-8 w-full text-center scale-105 transform transition-all">
-                                <span class="block text-5xl font-black text-amber-600" id="rank-1-week">Week --</span>
-                                <span class="text-sm font-medium text-amber-800/60 mt-2 block" id="rank-1-date">--</span>
-                                <div class="mt-4 pt-4 border-t border-amber-200/50">
-                                    <p class="text-xs text-amber-700" id="rank-1-desc">Berekenen...</p>
-                                </div>
+                        <!-- Runners up -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white/50 p-4 rounded-2xl border border-stone-100">
+                                <span class="text-xs font-bold text-stone-400 block mb-1">#2</span>
+                                <span class="text-xl font-bold text-stone-600 block" id="rank-2-week">Wk --</span>
                             </div>
-                        </div>
-
-                        <!-- Rank 3 -->
-                        <div class="order-3 sm:order-3 flex flex-col items-center justify-end pb-4">
-                            <div class="text-sm font-bold text-slate-400 mb-2">#3</div>
-                            <div class="bg-stone-50 border-2 border-stone-100 rounded-xl p-6 w-full text-center hover:border-amber-200 transition-colors">
-                                <span class="block text-3xl font-bold text-slate-700" id="rank-3-week">Week --</span>
-                                <span class="text-xs text-slate-500" id="rank-3-date">--</span>
+                            <div class="bg-white/50 p-4 rounded-2xl border border-stone-100">
+                                <span class="text-xs font-bold text-stone-400 block mb-1">#3</span>
+                                <span class="text-xl font-bold text-stone-600 block" id="rank-3-week">Wk --</span>
                             </div>
                         </div>
                     </div>
@@ -170,218 +184,130 @@
             </div>
         </section>
 
-        <!-- SECTION 2: Visualization -->
-        <section>
-            <div class="mb-6 px-2">
-                <h3 class="text-2xl font-bold text-slate-900">De Klimaat Grafiek</h3>
-                <p class="text-slate-600">Onderstaande grafiek toont het historisch verloop van de Nederlandse zomer (Week 22 t/m 36).</p>
+        <!-- Visualization -->
+        <section class="soft-card p-6 md:p-8">
+            <div class="text-center mb-8">
+                <h3 class="text-2xl font-bold text-stone-800">Het grote plaatje</h3>
+                <p class="text-stone-500">De Nederlandse zomer in één oogopslag (gemiddeldes)</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="climateChart"></canvas>
+            </div>
+            <!-- Friendly Legend -->
+            <div class="mt-8 flex flex-wrap justify-center gap-4 text-sm">
+                <div class="flex items-center gap-2 bg-[#FFE5D9] px-4 py-2 rounded-full text-[#D96C6C] font-semibold">
+                    <span>🌡️ Temp</span>
+                </div>
+                <div class="flex items-center gap-2 bg-[#FFF4C3] px-4 py-2 rounded-full text-[#B89C26] font-semibold">
+                    <span>☀️ Zon</span>
+                </div>
+                <div class="flex items-center gap-2 bg-[#D0F4F7] px-4 py-2 rounded-full text-[#4AA3A8] font-semibold">
+                    <span>💧 Regenrisico</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Regions -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-3 text-center">
+                <h3 class="text-2xl font-bold text-stone-800">Kies je regio</h3>
             </div>
             
-            <div class="bg-white p-4 sm:p-8 rounded-2xl shadow-sm border border-stone-200">
-                <div class="chart-container">
-                    <canvas id="climateChart"></canvas>
-                </div>
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-500 bg-stone-50 p-4 rounded-lg">
-                    <div class="flex items-start gap-2">
-                        <div class="w-3 h-3 rounded-full bg-amber-500 mt-1"></div>
-                        <p><strong>Temperatuur:</strong> Piekt traditioneel eind juli / begin augustus (de 'Hondsdagen').</p>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <div class="w-3 h-3 rounded-full bg-yellow-400 mt-1"></div>
-                        <p><strong>Zonuren:</strong> De langste dagen zijn in juni (week 25), maar vaak koeler.</p>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <div class="w-3 h-3 rounded-full bg-sky-400 mt-1"></div>
-                        <p><strong>Neerslag:</strong> Augustus is vaak warm, maar de kans op stevige onweersbuien neemt toe.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <button onclick="setRegion('coast')" id="btn-coast" class="group bg-white hover:bg-[#D0F4F7] p-6 rounded-[2rem] shadow-sm border border-transparent hover:border-[#4AA3A8] transition-all duration-300 text-left">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🏖️</div>
+                <h4 class="font-bold text-xl text-stone-800 mb-2">Kust</h4>
+                <p class="text-sm text-stone-500 leading-relaxed">
+                    Vaker zon in het voorjaar, koeler in de zomer. Minder heftige onweersbuien.
+                </p>
+            </button>
 
-        <!-- SECTION 3: Detailed Breakdown -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="col-span-1 md:col-span-3 mb-2 px-2">
-                <h3 class="text-2xl font-bold text-slate-900">Seizoensfases</h3>
-                <p class="text-slate-600">Elk deel van de zomer heeft zijn eigen karakteristieken.</p>
-            </div>
-
-            <!-- Early Summer -->
-            <div class="bg-white rounded-xl p-6 shadow-sm border-t-4 border-yellow-300 hover:shadow-md transition-shadow">
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="font-bold text-lg">De Vroege Zomer</h4>
-                    <span class="text-xs font-mono bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Week 24 - 27</span>
-                </div>
-                <ul class="space-y-3 text-sm text-slate-600">
-                    <li class="flex items-start gap-2">
-                        <span class="text-green-500">✓</span> 
-                        <span><strong>Langste dagen:</strong> Licht tot 22:30u. Ideaal voor avondactiviteiten.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-green-500">✓</span> 
-                        <span><strong>Frisse natuur:</strong> Alles staat groen en in bloei.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-amber-500">⚠</span> 
-                        <span><strong>Schaapscheerderskou:</strong> Kans op een koele dip in juni.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-amber-500">⚠</span> 
-                        <span><strong>Zeewater:</strong> Nog erg koud (14-16°C).</span>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- High Summer -->
-            <div class="bg-white rounded-xl p-6 shadow-sm border-t-4 border-amber-500 hover:shadow-md transition-shadow">
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="font-bold text-lg">De Hoogzomer</h4>
-                    <span class="text-xs font-mono bg-amber-100 text-amber-800 px-2 py-1 rounded">Week 28 - 32</span>
-                </div>
-                <ul class="space-y-3 text-sm text-slate-600">
-                    <li class="flex items-start gap-2">
-                        <span class="text-green-500">✓</span> 
-                        <span><strong>Maximale warmte:</strong> Grootste kans op 25°C+ en hittegolven.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-green-500">✓</span> 
-                        <span><strong>Terrasweer:</strong> Stabiele avondtemperaturen.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-amber-500">⚠</span> 
-                        <span><strong>Hondsdagen:</strong> Traditioneel warmst, maar ook broeierig.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-red-500">✕</span> 
-                        <span><strong>Drukte:</strong> Piekseizoen, volste stranden en wegen (Bouwvak).</span>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Late Summer -->
-            <div class="bg-white rounded-xl p-6 shadow-sm border-t-4 border-orange-400 hover:shadow-md transition-shadow">
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="font-bold text-lg">De Nazomer</h4>
-                    <span class="text-xs font-mono bg-orange-100 text-orange-800 px-2 py-1 rounded">Week 33 - 36</span>
-                </div>
-                <ul class="space-y-3 text-sm text-slate-600">
-                    <li class="flex items-start gap-2">
-                        <span class="text-green-500">✓</span> 
-                        <span><strong>Warm Water:</strong> Zee en meren zijn op hun warmst (20°C).</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-green-500">✓</span> 
-                        <span><strong>Gouden licht:</strong> Zon staat lager, prachtig voor fotografie.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-amber-500">⚠</span> 
-                        <span><strong>Kortere dagen:</strong> Merkbaar eerder donker (rond 21:00u).</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-red-500">✕</span> 
-                        <span><strong>Regenkans:</strong> Kans op langdurige buien neemt toe richting september.</span>
-                    </li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- SECTION 4: Regional Context -->
-        <section class="bg-stone-800 text-stone-200 rounded-2xl p-8 shadow-xl">
-            <div class="flex flex-col md:flex-row gap-8 items-center">
-                <div class="flex-1">
-                    <h3 class="text-2xl font-bold text-white mb-2">Kust vs. Binnenland</h3>
-                    <p class="mb-4 text-stone-400">Waar je bent in Nederland maakt uit. Kies je regio voor advies:</p>
-                    
-                    <div class="inline-flex bg-stone-700 p-1 rounded-lg mb-4">
-                        <button onclick="setRegion('coast')" id="btn-coast" class="px-4 py-2 rounded-md text-sm font-medium transition-all bg-amber-500 text-stone-900 shadow">Kustprovincies</button>
-                        <button onclick="setRegion('inland')" id="btn-inland" class="px-4 py-2 rounded-md text-sm font-medium transition-all hover:text-white text-stone-400">Binnenland</button>
-                    </div>
-
-                    <div id="region-text" class="text-lg font-light leading-relaxed border-l-4 border-amber-500 pl-4">
-                        Aan de kust is het in de voorzomer vaak zonniger dan in het binnenland omdat wolken boven de nog koude zee oplossen. In hoogzomer is het er koeler (zeewind), maar heb je minder last van zware onweersbuien dan in het oosten.
-                    </div>
-                </div>
-                <div class="w-full md:w-1/3 flex justify-center">
-                    <div class="text-9xl opacity-20 select-none">🌊</div>
+            <button onclick="setRegion('inland')" id="btn-inland" class="group bg-white hover:bg-[#FFE5D9] p-6 rounded-[2rem] shadow-sm border border-transparent hover:border-[#D96C6C] transition-all duration-300 text-left">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🌳</div>
+                <h4 class="font-bold text-xl text-stone-800 mb-2">Binnenland</h4>
+                <p class="text-sm text-stone-500 leading-relaxed">
+                    Snel warmer (hittegolven!), maar ook grotere kans op stapelwolken en buien.
+                </p>
+            </button>
+            
+            <div class="soft-card p-6 flex flex-col justify-center bg-white">
+                <div class="text-sm font-medium text-stone-400 mb-2 uppercase tracking-wide">Geselecteerde info</div>
+                <div id="region-info" class="text-stone-600 font-medium leading-relaxed">
+                    Klik op een regio hiernaast voor specifiek advies!
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- FOOTER WITH SOURCES -->
-    <footer class="bg-white border-t border-stone-200 pt-12 pb-8 mt-12">
+    <!-- Footer -->
+    <footer class="bg-white mt-12 py-12 border-t border-stone-100">
         <div class="max-w-6xl mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-10">
+                
+                <!-- Col 1: Sources -->
                 <div>
-                    <h5 class="font-bold text-slate-900 mb-4">Bronnen & Data</h5>
-                    <ul class="space-y-2 text-sm text-slate-500">
+                    <h5 class="font-bold text-stone-800 mb-4 text-lg">Bronnen & data</h5>
+                    <ul class="space-y-3 text-sm text-stone-500">
                         <li>
-                            <a href="https://www.knmi.nl/nederland-nu/klimatologie/normaal-en-extreem" target="_blank" class="hover:text-amber-600 transition-colors flex items-center gap-2">
-                                📊 <span>KNMI Klimaatdashboard (Normaalwaarden 1991-2020)</span>
+                            <a href="https://www.knmi.nl/nederland-nu/klimatologie/normaal-en-extreem" target="_blank" class="hover:text-[#FF8BA7] transition-colors flex items-center gap-2 group">
+                                <span class="bg-[#FFE5D9] p-1.5 rounded-full text-xs group-hover:scale-110 transition-transform">📊</span>
+                                <span>KNMI Klimaatdashboard (Normaalwaarden 1991-2020)</span>
                             </a>
                         </li>
                         <li>
-                            <a href="https://www.weerstatistieken.nl/" target="_blank" class="hover:text-amber-600 transition-colors flex items-center gap-2">
-                                📅 <span>Weerstatistieken.nl (Historische daggegevens)</span>
+                            <a href="https://www.weerstatistieken.nl/" target="_blank" class="hover:text-[#FF8BA7] transition-colors flex items-center gap-2 group">
+                                <span class="bg-[#FFF4C3] p-1.5 rounded-full text-xs group-hover:scale-110 transition-transform">📅</span>
+                                <span>Weerstatistieken.nl (Historische daggegevens)</span>
                             </a>
                         </li>
-                        <li>
-                            <span class="flex items-center gap-2">
-                                🏖️ <span>Drukte-indicatoren o.b.v. Schoolvakanties & ANWB trends</span>
-                            </span>
+                        <li class="flex items-center gap-2">
+                            <span class="bg-[#D0F4F7] p-1.5 rounded-full text-xs">🏖️</span>
+                            <span>Drukte-indicatoren o.b.v. Schoolvakanties & ANWB trends</span>
                         </li>
                     </ul>
                 </div>
                 
+                <!-- Col 2: About -->
                 <div>
-                    <h5 class="font-bold text-slate-900 mb-4">Over deze tool</h5>
-                    <p class="text-sm text-slate-500 leading-relaxed">
-                        Deze applicatie is gebouwd om inzicht te geven in de 'kansen' op goed weer. 
-                        Het weer in Nederland is grillig; resultaten bieden geen garantie voor de toekomst.
-                        De berekening gebruikt een gewogen gemiddelde van temperatuurmaxima, zonuren en neerslagkans per week.
-                    </p>
+                    <h5 class="font-bold text-stone-800 mb-4 text-lg">Over deze tool</h5>
+                    <div class="bg-stone-50 rounded-2xl p-6 text-sm text-stone-500 leading-relaxed border border-stone-100">
+                        <p class="mb-2">Deze applicatie is gebouwd om inzicht te geven in de 'kansen' op goed weer.</p>
+                        <p class="mb-2">Het weer in Nederland is grillig; resultaten bieden geen garantie voor de toekomst.</p>
+                        <p>De berekening gebruikt een gewogen gemiddelde van temperatuurmaxima, zonuren en neerslagkans per week.</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="border-t border-stone-100 pt-8 text-center text-xs text-slate-400">
-                &copy; 2024 ZomerPlanner NL • <span class="text-amber-600/60">Geniet van de zon, als 'ie schijnt!</span>
+            <!-- Bottom Copyright -->
+            <div class="border-t border-stone-100 pt-8 text-center text-xs font-medium text-stone-400">
+                &copy; 2024 ZomerPlanner NL • <span class="text-[#FF8BA7]">Geniet van de zon, als 'ie schijnt!</span>
             </div>
         </div>
     </footer>
 
     <script>
         // --- DATA & STATE ---
-        
-        // Approximated Data based on KNMI Climatology (De Bilt/General NL average)
-        // Weeks 22 (End May) to 36 (Early Sept)
-        // Temp: Avg Daily Max. Sun: Avg Hours/day. Rain: Inverse Score (10 = dry, 0 = wet).
         const weekData = [
-            { week: 22, label: "Eind Mei", temp: 18.5, sun: 7.2, dry: 7.0, desc: "Fris lente-einde" },
-            { week: 23, label: "Begin Jun", temp: 19.2, sun: 7.4, dry: 6.5, desc: "Kans op juni-dip" },
-            { week: 24, label: "Half Jun", temp: 20.0, sun: 7.6, dry: 7.0, desc: "Langste dagen" },
-            { week: 25, label: "Eind Jun", temp: 20.8, sun: 7.7, dry: 7.2, desc: "Veel licht, aangenamer" },
-            { week: 26, label: "Eind Jun", temp: 21.5, sun: 7.6, dry: 7.0, desc: "Start zomergevoel" },
-            { week: 27, label: "Begin Jul", temp: 22.2, sun: 7.4, dry: 6.8, desc: "Warmer, iets benauwder" },
-            { week: 28, label: "Half Jul", temp: 23.0, sun: 7.3, dry: 6.5, desc: "Hitte kans neemt toe" },
-            { week: 29, label: "Eind Jul", temp: 23.5, sun: 7.2, dry: 6.2, desc: "Hoogzomer piek" },
-            { week: 30, label: "Eind Jul", temp: 24.0, sun: 7.1, dry: 6.0, desc: "Vaak de warmste week" },
-            { week: 31, label: "Begin Aug", temp: 24.0, sun: 7.0, dry: 6.0, desc: "Hondsdagen, kans onweer" },
-            { week: 32, label: "Half Aug", temp: 23.8, sun: 6.8, dry: 6.2, desc: "Warm en stabiel" },
-            { week: 33, label: "Half Aug", temp: 23.0, sun: 6.5, dry: 6.5, desc: "Heerlijk nazomeren" },
-            { week: 34, label: "Eind Aug", temp: 22.0, sun: 6.0, dry: 6.8, desc: "Dagen korter, rustiger" },
-            { week: 35, label: "Begin Sep", temp: 20.5, sun: 5.5, dry: 7.0, desc: "Frisser, warm water" },
-            { week: 36, label: "Half Sep", temp: 19.0, sun: 5.0, dry: 6.5, desc: "Herfst komt eraan" },
+            { week: 22, label: "Eind mei", temp: 18.5, sun: 7.2, dry: 7.0, desc: "Fris & fruitig" },
+            { week: 23, label: "Begin jun", temp: 19.2, sun: 7.4, dry: 6.5, desc: "Lente vibes" },
+            { week: 24, label: "Half jun", temp: 20.0, sun: 7.6, dry: 7.0, desc: "Lange avonden" },
+            { week: 25, label: "Eind jun", temp: 20.8, sun: 7.7, dry: 7.2, desc: "Licht & luchtig" },
+            { week: 26, label: "Eind jun", temp: 21.5, sun: 7.6, dry: 7.0, desc: "Zomer start!" },
+            { week: 27, label: "Begin jul", temp: 22.2, sun: 7.4, dry: 6.8, desc: "Lekker warm" },
+            { week: 28, label: "Half jul", temp: 23.0, sun: 7.3, dry: 6.5, desc: "Terrasweer" },
+            { week: 29, label: "Eind jul", temp: 23.5, sun: 7.2, dry: 6.2, desc: "Top zomer" },
+            { week: 30, label: "Eind jul", temp: 24.0, sun: 7.1, dry: 6.0, desc: "De piek" },
+            { week: 31, label: "Begin aug", temp: 24.0, sun: 7.0, dry: 6.0, desc: "Hondsdagen" },
+            { week: 32, label: "Half aug", temp: 23.8, sun: 6.8, dry: 6.2, desc: "Zwoele avonden" },
+            { week: 33, label: "Half aug", temp: 23.0, sun: 6.5, dry: 6.5, desc: "Nazomeren" },
+            { week: 34, label: "Eind aug", temp: 22.0, sun: 6.0, dry: 6.8, desc: "Rust keert terug" },
+            { week: 35, label: "Begin sep", temp: 20.5, sun: 5.5, dry: 7.0, desc: "Fris water" },
+            { week: 36, label: "Half sep", temp: 19.0, sun: 5.0, dry: 6.5, desc: "Trui aan" },
         ];
 
-        let preferences = {
-            temp: 50,
-            sun: 50,
-            rain: 50
-        };
-
+        let preferences = { temp: 50, sun: 50, rain: 50 };
         let myChart = null;
 
-        // --- DOM ELEMENTS ---
         const sliderTemp = document.getElementById('input-temp');
         const sliderSun = document.getElementById('input-sun');
         const sliderRain = document.getElementById('input-rain');
@@ -390,61 +316,50 @@
         const valSun = document.getElementById('val-sun');
         const valRain = document.getElementById('val-rain');
 
-        // --- CORE LOGIC ---
-
         function calculateScores() {
-            // Normalize weights (0-1)
             const wT = preferences.temp / 100;
             const wS = preferences.sun / 100;
             const wR = preferences.rain / 100;
 
             const scoredWeeks = weekData.map(d => {
-                // Normalize data points to roughly 0-1 scale for calculation
-                const nTemp = (d.temp - 18) / (24 - 18); // range 18-24
-                const nSun = (d.sun - 5) / (8 - 5);      // range 5-8
-                const nDry = (d.dry - 5) / (8 - 5);      // range 5-8 (score 10 is dry)
-
-                // Calculate weighted score
-                // Base score ensures weeks don't get 0 easily
+                const nTemp = (d.temp - 18) / (24 - 18);
+                const nSun = (d.sun - 5) / (8 - 5);
+                const nDry = (d.dry - 5) / (8 - 5);
                 let score = (nTemp * wT) + (nSun * wS) + (nDry * wR);
-                
                 return { ...d, score: score };
             });
 
-            // Sort descending
             scoredWeeks.sort((a, b) => b.score - a.score);
-
             updateUI(scoredWeeks);
         }
 
         function updateUI(sortedData) {
-            // Update Top 3 Cards
             const top1 = sortedData[0];
             const top2 = sortedData[1];
             const top3 = sortedData[2];
 
-            // Render #1
             document.getElementById('rank-1-week').textContent = `Week ${top1.week}`;
-            document.getElementById('rank-1-date').textContent = `${top1.label} • ${top1.temp}°C gem.`;
+            document.getElementById('rank-1-date').textContent = top1.label;
             document.getElementById('rank-1-desc').textContent = top1.desc;
 
-            // Render #2
-            document.getElementById('rank-2-week').textContent = `Week ${top2.week}`;
-            document.getElementById('rank-2-date').textContent = `${top2.label}`;
-
-            // Render #3
-            document.getElementById('rank-3-week').textContent = `Week ${top3.week}`;
-            document.getElementById('rank-3-date').textContent = `${top3.label}`;
+            document.getElementById('rank-2-week').textContent = `Wk ${top2.week}`;
+            document.getElementById('rank-3-week').textContent = `Wk ${top3.week}`;
         }
 
-        // --- CHART CONFIG ---
         function initChart() {
-            const ctx = document.getElementById('climateChart').getContext('2d');
+            const canvas = document.getElementById('climateChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             
-            const labels = weekData.map(d => `Wk ${d.week}`);
+            // Softer colors for chart
+            const labels = weekData.map(d => `${d.week}`);
             const tempData = weekData.map(d => d.temp);
             const sunData = weekData.map(d => d.sun);
-            const rainData = weekData.map(d => 10 - d.dry); // Invert dry score to show "Rain Risk"
+            const rainData = weekData.map(d => 10 - d.dry);
+
+            // Chart font settings
+            Chart.defaults.font.family = "'Quicksand', sans-serif";
+            Chart.defaults.color = '#9ca3af';
 
             myChart = new Chart(ctx, {
                 type: 'bar',
@@ -453,28 +368,31 @@
                     datasets: [
                         {
                             type: 'line',
-                            label: 'Temperatuur (°C)',
+                            label: 'Temperatuur',
                             data: tempData,
-                            borderColor: '#d97706', // amber-600
-                            backgroundColor: '#d97706',
-                            borderWidth: 3,
+                            borderColor: '#FF8BA7', // Soft Coral
+                            backgroundColor: '#FF8BA7',
+                            borderWidth: 4,
                             yAxisID: 'y',
                             tension: 0.4,
-                            pointRadius: 3
+                            pointRadius: 0,
+                            pointHoverRadius: 6
                         },
                         {
                             type: 'bar',
-                            label: 'Zonuren (per dag)',
+                            label: 'Zonuren',
                             data: sunData,
-                            backgroundColor: 'rgba(250, 204, 21, 0.6)', // yellow-400
+                            backgroundColor: '#FFEaa7', // Soft Yellow
+                            hoverBackgroundColor: '#FFD93D',
                             yAxisID: 'y1',
-                            borderRadius: 4
+                            borderRadius: 6,
+                            barPercentage: 0.6
                         },
                         {
                             type: 'line',
-                            label: 'Neerslag Risico (Index)',
+                            label: 'Regenrisico',
                             data: rainData,
-                            borderColor: '#38bdf8', // sky-400
+                            borderColor: '#81ECEC', // Soft Cyan
                             borderDash: [5, 5],
                             borderWidth: 2,
                             yAxisID: 'y1',
@@ -487,79 +405,61 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
                     plugins: {
                         tooltip: {
-                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                            titleColor: '#1c1917',
-                            bodyColor: '#44403c',
-                            borderColor: '#e5e7eb',
+                            backgroundColor: '#FFF',
+                            titleColor: '#333',
+                            bodyColor: '#666',
+                            borderColor: '#eee',
                             borderWidth: 1,
-                            padding: 10
+                            padding: 12,
+                            cornerRadius: 12,
+                            displayColors: true,
+                            boxPadding: 4
                         },
-                        legend: {
-                            position: 'top',
-                            align: 'end'
-                        }
+                        legend: { display: false }
                     },
                     scales: {
                         y: {
                             type: 'linear',
-                            display: true,
+                            display: true, 
                             position: 'left',
-                            title: { display: true, text: 'Temperatuur (°C)' },
-                            min: 15,
-                            max: 30
+                            min: 15, max: 30,
+                            grid: {
+                                color: 'rgba(0,0,0,0.03)',
+                                borderDash: [5, 5],
+                            },
+                            ticks: {
+                                callback: function(value) { return value + '°'; }
+                            }
                         },
                         y1: {
                             type: 'linear',
                             display: true,
                             position: 'right',
+                            min: 0, max: 12,
                             grid: {
-                                drawOnChartArea: false,
-                            },
-                            title: { display: true, text: 'Uren / Index' },
-                            min: 0,
-                            max: 12
+                                display: false
+                            }
                         },
                         x: {
-                            grid: { display: false }
+                            grid: { display: false },
+                            ticks: { font: { weight: 'bold' } }
                         }
                     }
                 }
             });
         }
 
-        // --- REGION TOGGLE LOGIC ---
         function setRegion(region) {
-            const btnCoast = document.getElementById('btn-coast');
-            const btnInland = document.getElementById('btn-inland');
-            const textBlock = document.getElementById('region-text');
-            const iconBlock = textBlock.nextElementSibling; // The div with the emoji
-
+            const info = document.getElementById('region-info');
             if (region === 'coast') {
-                btnCoast.classList.add('bg-amber-500', 'text-stone-900', 'shadow');
-                btnCoast.classList.remove('text-stone-400', 'hover:text-white');
-                
-                btnInland.classList.remove('bg-amber-500', 'text-stone-900', 'shadow');
-                btnInland.classList.add('text-stone-400', 'hover:text-white');
-
-                textBlock.innerHTML = `Aan de <strong>kust</strong> is het in de voorzomer vaak zonniger omdat wolken boven de nog koude zee oplossen. In hoogzomer is het er koeler door zeewind, maar heb je minder last van zware stapelwolken en onweer dan in het oosten.`;
+                info.innerHTML = "🌊 <span class='font-bold text-[#4AA3A8]'>Kust:</span> Perfect voor zonaanbidders in juni. In juli/augustus vaak 3-5 graden koeler dan het binnenland (fijn tijdens hittegolven!), maar let op de zeewind.";
             } else {
-                btnInland.classList.add('bg-amber-500', 'text-stone-900', 'shadow');
-                btnInland.classList.remove('text-stone-400', 'hover:text-white');
-
-                btnCoast.classList.remove('bg-amber-500', 'text-stone-900', 'shadow');
-                btnCoast.classList.add('text-stone-400', 'hover:text-white');
-
-                textBlock.innerHTML = `In het <strong>binnenland</strong> (Veluwe, Achterhoek, Limburg) loopt de temperatuur sneller op. Heerlijk voor hitteliefhebbers, vaak 2-4 graden warmer dan aan zee. Wel is de kans op een stevige regen- of onweersbui in de namiddag statistisch groter.`;
+                info.innerHTML = "🌳 <span class='font-bold text-[#D96C6C]'>Binnenland:</span> Hier haal je de hoogste temperaturen. Ideaal voor zwembad-vakanties in de bossen. Wel grotere kans op regenbuien die blijven hangen.";
             }
         }
 
-        // --- EVENT LISTENERS ---
         function handleInput() {
             preferences.temp = parseInt(sliderTemp.value);
             preferences.sun = parseInt(sliderSun.value);
@@ -576,12 +476,10 @@
         sliderSun.addEventListener('input', handleInput);
         sliderRain.addEventListener('input', handleInput);
 
-        // --- INIT ---
         window.addEventListener('load', () => {
             initChart();
-            calculateScores(); // Initial calculation
+            calculateScores();
         });
-
     </script>
 </body>
 </html>
