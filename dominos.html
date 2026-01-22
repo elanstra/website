@@ -203,7 +203,8 @@
             step: 0,
             answers: [],
             loading: false,
-            result: null
+            result: null,
+            shouldFocus: false
         };
 
         const app = document.getElementById('app');
@@ -212,6 +213,7 @@
 
         function calculateResult(finalAnswers) {
             state.loading = true;
+            state.shouldFocus = true;
             render();
 
             setTimeout(() => {
@@ -244,6 +246,7 @@
 
                 state.result = winner;
                 state.loading = false;
+                state.shouldFocus = true;
                 render();
             }, 2000);
         }
@@ -253,6 +256,7 @@
             
             if (state.step < questions.length - 1) {
                 state.step++;
+                state.shouldFocus = true;
                 render();
             } else {
                 calculateResult(state.answers);
@@ -264,6 +268,7 @@
             state.answers = [];
             state.result = null;
             state.loading = false;
+            state.shouldFocus = true;
             render();
         }
 
@@ -295,7 +300,7 @@
                         </div>
                     </div>
                     <div class="text-center">
-                        <p class="text-xl font-black animate-pulse uppercase">Algoritme aanlingeren...</p>
+                        <p id="loading-title" tabindex="-1" class="text-xl font-black animate-pulse uppercase outline-none">Algoritme aanlingeren...</p>
                         <p class="text-sm font-bold text-pink-600 mt-2">
                             "Punten tellen..."<br/>
                             "Jury omkopen..."
@@ -311,7 +316,7 @@
                 <div class="text-center space-y-6 animate-fade-in">
                     <div class="p-8 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] ${resultData.color} transform transition hover:-translate-y-2 duration-300">
                         <div class="text-8xl mb-6 animate-bounce drop-shadow-lg">${resultData.img}</div>
-                        <h2 class="text-3xl font-black mb-4 uppercase leading-none italic">${resultData.name}</h2>
+                        <h2 id="result-title" tabindex="-1" class="text-3xl font-black mb-4 uppercase leading-none italic outline-none">${resultData.name}</h2>
                         <p class="text-md font-bold leading-relaxed border-t-4 border-black pt-4">
                             ${resultData.desc}
                         </p>
@@ -361,7 +366,7 @@
                         </div>
                     </div>
                     
-                    <h2 class="text-2xl font-black text-black leading-none uppercase transform -rotate-1">
+                    <h2 id="question-title" tabindex="-1" class="text-2xl font-black text-black leading-none uppercase transform -rotate-1 outline-none">
                         ${currentQ.text}
                     </h2>
 
@@ -396,6 +401,16 @@
             `;
 
             lucide.createIcons();
+
+            if (state.shouldFocus) {
+                const title = document.getElementById('question-title') ||
+                              document.getElementById('result-title') ||
+                              document.getElementById('loading-title');
+                if (title) {
+                    title.focus();
+                }
+                state.shouldFocus = false;
+            }
         }
 
         window.handleOptionClick = (idx) => {
