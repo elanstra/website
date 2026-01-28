@@ -244,7 +244,7 @@
 
                 state.result = winner;
                 state.loading = false;
-                render();
+                render(true);
             }, 2000);
         }
 
@@ -253,7 +253,7 @@
             
             if (state.step < questions.length - 1) {
                 state.step++;
-                render();
+                render(true);
             } else {
                 calculateResult(state.answers);
             }
@@ -311,7 +311,7 @@
                 <div class="text-center space-y-6 animate-fade-in">
                     <div class="p-8 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] ${resultData.color} transform transition hover:-translate-y-2 duration-300">
                         <div class="text-8xl mb-6 animate-bounce drop-shadow-lg">${resultData.img}</div>
-                        <h2 class="text-3xl font-black mb-4 uppercase leading-none italic">${resultData.name}</h2>
+                        <h2 id="step-title" tabindex="-1" class="text-3xl font-black mb-4 uppercase leading-none italic outline-none">${resultData.name}</h2>
                         <p class="text-md font-bold leading-relaxed border-t-4 border-black pt-4">
                             ${resultData.desc}
                         </p>
@@ -361,7 +361,7 @@
                         </div>
                     </div>
                     
-                    <h2 class="text-2xl font-black text-black leading-none uppercase transform -rotate-1">
+                    <h2 id="step-title" tabindex="-1" class="text-2xl font-black text-black leading-none uppercase transform -rotate-1 outline-none">
                         ${currentQ.text}
                     </h2>
 
@@ -377,7 +377,7 @@
             `;
         }
 
-        function render() {
+        function render(shouldFocus = false) {
             let contentHTML = '';
             
             if (state.loading) {
@@ -396,6 +396,13 @@
             `;
 
             lucide.createIcons();
+
+            if (shouldFocus) {
+                const title = document.getElementById('step-title');
+                if (title) {
+                    title.focus();
+                }
+            }
         }
 
         window.handleOptionClick = (idx) => {
