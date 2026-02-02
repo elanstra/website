@@ -365,6 +365,7 @@
                 right: 16px; left: 16px;
                 max-height: 40vh;
             }
+            .quest-header { padding: 10px 20px; }
             
             .bottom-hud { margin-bottom: 20px; width: 100%; }
             .hud-timer-panel { min-width: 0; width: 100%; padding: 15px; }
@@ -821,7 +822,16 @@
             scene.fog = new THREE.FogExp2(0x1e1b4b, 0.02); // Dark blue fog
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-            updateCameraPosition();
+            
+            // Initial Camera Position
+            updateCameraPosition(); 
+            // Mobile Specific Tweaks on Init
+            if(window.innerWidth <= 768) {
+                // Adjust LookAt target to shift wizard down visually
+                camera.lookAt(0, 4, 0); 
+            } else {
+                camera.lookAt(0, 2, 0);
+            }
 
             renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -859,7 +869,13 @@
 
         function updateCameraPosition() {
             camera.position.set(Math.sin(cameraAngle) * cameraRadius, 4, Math.cos(cameraAngle) * cameraRadius);
-            camera.lookAt(0, 2, 0);
+            
+            // Keep correct LookAt during rotation
+            if(window.innerWidth <= 768) {
+                camera.lookAt(0, 4, 0); 
+            } else {
+                camera.lookAt(0, 2, 0);
+            }
         }
 
         function createLandscape() {
@@ -1053,6 +1069,7 @@
             if (camera && renderer) {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
+                updateCameraPosition();
             }
         });
 
