@@ -354,6 +354,12 @@
                 background: rgba(10, 10, 20, 0.95);
             }
             
+            /* Force content visible when modal active */
+            .mobile-modal-active .quest-content {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+            }
+            
             /* CSS UPDATE HERE: Extra padding for mobile header */
             .mobile-modal-active .quest-header {
                 padding-top: 90px; /* Space for close button and status bar */
@@ -683,7 +689,13 @@
         function updateCameraPosition() {
             // Stable rotation around the center
             camera.position.set(Math.sin(cameraAngle) * cameraRadius, 4, Math.cos(cameraAngle) * cameraRadius);
-            camera.lookAt(0, 2, 0);
+            
+            // Keep correct LookAt during rotation
+            if(window.innerWidth <= 768) {
+                camera.lookAt(0, 4, 0); 
+            } else {
+                camera.lookAt(0, 2, 0);
+            }
         }
 
         function createLandscape() {
@@ -805,7 +817,12 @@
 
         function startGame() {
             const name = document.getElementById('char-name-input').value || "Dev"; gameState.name = name; document.getElementById('login-overlay').classList.remove('active');
-            if (window.innerWidth <= 768) document.getElementById('quest-log-panel').classList.add('minimized');
+            
+            // REMOVED AUTO-MINIMIZE FOR MOBILE TO FIX INVISIBLE QUEST LIST BUG
+            // if (window.innerWidth <= 768) {
+            //    document.getElementById('quest-log-panel').classList.add('minimized');
+            // }
+            
             initWorld(); rpgSystem.updateUI();
         }
         
