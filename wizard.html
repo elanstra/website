@@ -302,6 +302,19 @@
         .btn-full { width: 100%; padding: 16px; border-radius: 16px; background: var(--primary-gradient); color: white; font-weight: 700; border: none; cursor: pointer; font-size: 1rem; transition: 0.2s; }
         .btn-full:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); }
 
+        /* --- ADMIN PANEL --- */
+        .admin-panel {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #111; border: 2px solid #ef4444; border-radius: 12px;
+            padding: 20px; z-index: 1000; box-shadow: 0 0 50px rgba(239, 68, 68, 0.3);
+            display: none; flex-direction: column; gap: 10px; min-width: 300px;
+        }
+        .admin-panel.active { display: flex; }
+        .admin-header { color: #ef4444; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .admin-btn { background: #333; color: white; border: 1px solid #444; padding: 10px; cursor: pointer; border-radius: 6px; text-align: left; }
+        .admin-btn:hover { background: #444; }
+        .admin-btn small { display: block; color: #888; font-size: 0.7em; }
+
         /* Toasts */
         .toast-container { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast {
@@ -325,6 +338,30 @@
 
     <canvas id="game-canvas"></canvas>
     <div class="drag-hint"><i class="fas fa-hand-pointer"></i> Drag to rotate camera</div>
+
+    <!-- ADMIN PANEL -->
+    <div class="admin-panel" id="admin-panel">
+        <div class="admin-header">Admin Control</div>
+        <button class="admin-btn" onclick="rpgSystem.admin.addXP(500)">
+            <i class="fas fa-plus"></i> Add 500 XP
+            <small>Instant XP Boost</small>
+        </button>
+        <button class="admin-btn" onclick="rpgSystem.admin.forceLevelUp()">
+            <i class="fas fa-arrow-up"></i> Force Level Up
+            <small>Triggers animation & reset</small>
+        </button>
+        <button class="admin-btn" onclick="rpgSystem.admin.fillStamina()">
+            <i class="fas fa-bolt"></i> Fill Stamina
+            <small>Set to 100%</small>
+        </button>
+        <button class="admin-btn" onclick="rpgSystem.admin.drainStamina()">
+            <i class="fas fa-battery-empty"></i> Drain Stamina
+            <small>Set to 5% (Test Low Power)</small>
+        </button>
+        <button class="admin-btn" onclick="document.getElementById('admin-panel').classList.remove('active')">
+            Close Panel
+        </button>
+    </div>
 
     <!-- HUD -->
     <div class="hud">
@@ -496,6 +533,31 @@
         };
 
         const rpgSystem = {
+            // ADMIN FUNCTIONS
+            admin: {
+                addXP: (amount) => {
+                    rpgSystem.showToast(`Admin: Added ${amount} XP`, "fa-user-secret");
+                    gameState.xp += amount;
+                    if (gameState.xp >= gameState.xpToNext) rpgSystem.levelUp();
+                    rpgSystem.updateUI();
+                },
+                forceLevelUp: () => {
+                    rpgSystem.showToast("Admin: Level Up Triggered", "fa-arrow-up");
+                    gameState.xp = gameState.xpToNext;
+                    rpgSystem.levelUp();
+                },
+                fillStamina: () => {
+                    rpgSystem.showToast("Admin: Stamina Refilled", "fa-bolt");
+                    gameState.stamina = 100;
+                    rpgSystem.updateUI();
+                },
+                drainStamina: () => {
+                    rpgSystem.showToast("Admin: Stamina Drained", "fa-battery-empty");
+                    gameState.stamina = 5;
+                    rpgSystem.updateUI();
+                }
+            },
+
             updateUI: () => {
                 document.getElementById('char-name-display').innerText = gameState.name;
                 document.getElementById('level-val').innerText = gameState.level;
@@ -782,42 +844,111 @@
             scene.add(elements.particles);
         }
 
+        // --- Zzz Texture Generator ---
+        function createZTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.font = 'bold 40px sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.fillText('Z', 32, 48);
+            return new THREE.CanvasTexture(canvas);
+        }
+
         function createWizard() {
             const group = new THREE.Group();
             
-            // Neon Robe
-            const robe = new THREE.Mesh(new THREE.ConeGeometry(1.2, 3.5, 7), new THREE.MeshStandardMaterial({ color: 0x3b82f6, flatShading: true }));
-            robe.position.y = 1.75; robe.castShadow = true; group.add(robe);
-            const head = new THREE.Mesh(new THREE.SphereGeometry(0.7, 12, 12), new THREE.MeshStandardMaterial({ color: 0xffccaa }));
-            head.position.y = 3.2; group.add(head);
+            // --- UPDATED WIZARD GEOMETRY ---
+            // 1. Robe Base - Tall and slender
+            const robe = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.6, 1.5, 3.5, 8), 
+                new THREE.MeshStandardMaterial({ color: 0x1e3a8a, flatShading: true }) // Dark Blue
+            );
+            robe.position.y = 1.75; 
+            robe.castShadow = true; 
+            group.add(robe);
 
+            // 2. Mantle/Shoulders - Resting ON the robe, not swallowing head
+            const shoulders = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.7, 1.6, 1.0, 8), 
+                new THREE.MeshStandardMaterial({ color: 0x4c1d95, flatShading: true }) // Deep Purple
+            );
+            shoulders.position.y = 3.0; // Higher up
+            group.add(shoulders);
+
+            // 3. Head - Visible now!
+            const head = new THREE.Mesh(
+                new THREE.SphereGeometry(0.7, 16, 16),
+                new THREE.MeshStandardMaterial({ color: 0xffccaa })
+            );
+            head.position.y = 3.8; // Popped out of collar
+            group.add(head);
+
+            // 4. Glowing Eyes
+            const eyeGeo = new THREE.BoxGeometry(0.15, 0.08, 0.1);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const eyeL = new THREE.Mesh(eyeGeo, eyeMat); eyeL.position.set(0.25, 3.9, 0.6); eyeL.rotation.y = 0.2; group.add(eyeL);
+            const eyeR = new THREE.Mesh(eyeGeo, eyeMat); eyeR.position.set(-0.25, 3.9, 0.6); eyeR.rotation.y = -0.2; group.add(eyeR);
+
+            // 5. Hat - Sitting correctly on head
             const hatGroup = new THREE.Group();
-            hatGroup.add(new THREE.Mesh(new THREE.ConeGeometry(0.8, 2, 8), new THREE.MeshStandardMaterial({ color: 0x172554 })).translateX(0).translateY(1).rotateX(-0.2));
-            hatGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.1, 8), new THREE.MeshStandardMaterial({ color: 0x172554 })));
-            hatGroup.position.y = 3.5; group.add(hatGroup);
+            hatGroup.add(new THREE.Mesh(new THREE.ConeGeometry(1.0, 2.5, 8), new THREE.MeshStandardMaterial({ color: 0x312e81 })).translateY(1.25).rotateX(-0.2));
+            hatGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.1, 8), new THREE.MeshStandardMaterial({ color: 0x312e81 })));
+            hatGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.15, 8), new THREE.MeshStandardMaterial({ color: 0xfbbf24 })).translateY(0.2));
+            hatGroup.position.y = 4.3; // Sits on top of head
+            group.add(hatGroup);
 
-            elements.handR = new THREE.Group(); elements.handR.position.set(1.0, 2.2, 0.6); group.add(elements.handR);
-            elements.backSlot = new THREE.Group(); elements.backSlot.position.set(0, 3, -0.8); group.add(elements.backSlot);
-            elements.headSlot = new THREE.Group(); elements.headSlot.position.set(0, 4.2, 0); group.add(elements.headSlot);
+            // 6. Floating Crystal Runes (Octahedrons)
+            elements.runes = [];
+            for(let i=0; i<3; i++) {
+                const rune = new THREE.Mesh(
+                    new THREE.OctahedronGeometry(0.3),
+                    new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true })
+                );
+                rune.userData = { angle: (i / 3) * Math.PI * 2, speed: 1.5, radius: 2.5, yOffset: 2 };
+                group.add(rune);
+                elements.runes.push(rune);
+            }
 
-            scene.add(group); elements.wizardGroup = group;
+            // 7. Zzz Particles (Hidden by default)
+            const zTex = createZTexture();
+            const zMat = new THREE.SpriteMaterial({ map: zTex, transparent: true, opacity: 0 });
+            elements.zs = [];
+            for(let i=0; i<3; i++) {
+                const zSprite = new THREE.Sprite(zMat.clone());
+                zSprite.scale.set(0.5, 0.5, 1);
+                zSprite.position.set(0.5, 5, 0); // Start above head
+                zSprite.visible = false;
+                zSprite.userData = { offset: i * 2, speed: 0.8 };
+                group.add(zSprite);
+                elements.zs.push(zSprite);
+            }
+
+            // Slots
+            elements.handR = new THREE.Group(); elements.handR.position.set(1.4, 2.5, 0.5); group.add(elements.handR);
+            elements.backSlot = new THREE.Group(); elements.backSlot.position.set(0, 3.0, -0.8); group.add(elements.backSlot);
+            elements.headSlot = new THREE.Group(); elements.headSlot.position.set(0, 5.0, 0); group.add(elements.headSlot);
+
+            scene.add(group); 
+            elements.wizardGroup = group;
         }
 
         function updateWizardGear() {
             if (gameState.level >= 2 && !elements.hasStaff) {
                 const staff = new THREE.Group();
-                staff.add(new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 4), new THREE.MeshStandardMaterial({ color: 0x475569 })));
-                const gem = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3), new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b }));
-                gem.position.y = 2; staff.add(gem);
+                staff.add(new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 4.5), new THREE.MeshStandardMaterial({ color: 0x475569 })));
+                const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.35), new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.8 }));
+                gem.position.y = 2.2; staff.add(gem);
                 staff.rotation.set(0.2, 0, -0.3); elements.handR.add(staff); elements.hasStaff = true;
             }
             if (gameState.level >= 3 && !elements.hasCape) {
-                const cape = new THREE.Mesh(new THREE.BoxGeometry(1.4, 2.5, 0.1), new THREE.MeshStandardMaterial({ color: 0x6366f1 }));
-                cape.position.y = -1; cape.rotation.x = 0.3; elements.backSlot.add(cape); elements.cape = cape; elements.hasCape = true;
+                const cape = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.8, 0.1), new THREE.MeshStandardMaterial({ color: 0x6366f1 }));
+                cape.position.y = -1.2; cape.rotation.x = 0.25; elements.backSlot.add(cape); elements.cape = cape; elements.hasCape = true;
             }
             if (gameState.level >= 5 && !elements.hasCrown) {
-                const crown = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.05, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffb020 }));
-                crown.rotation.x = Math.PI / 2; elements.headSlot.add(crown); elements.hasCrown = true;
+                const crown = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.05, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffb020 }));
+                crown.rotation.x = Math.PI / 2; crown.position.y = -0.2; elements.headSlot.add(crown); elements.hasCrown = true;
             }
         }
 
@@ -826,26 +957,76 @@
             if(active) {
                 elements.wizardGroup.position.y = 1; elements.magicLight.intensity = 2; 
                 elements.particles.material.color.setHex(0xd946ef); // Pink energy
+                elements.runes.forEach(r => { r.visible = true; r.material.color.setHex(0xd946ef); r.material.wireframe = false; });
+                elements.zs.forEach(z => z.visible = false);
             } else {
                 elements.wizardGroup.position.y = 0; elements.magicLight.intensity = 0; 
                 elements.particles.material.color.setHex(0xc084fc); // Purple idle
+                elements.runes.forEach(r => { r.visible = true; r.material.color.setHex(0x00ffff); r.material.wireframe = true; });
+                elements.zs.forEach(z => z.visible = false);
             }
         }
 
         function startWizardRest(active) {
-            if(active) { elements.wizardGroup.position.y = -0.5; elements.wizardGroup.rotation.x = 0.2; }
-            else { elements.wizardGroup.position.y = 0; elements.wizardGroup.rotation.x = 0; }
+            if(active) { 
+                elements.wizardGroup.position.y = -0.5; 
+                elements.wizardGroup.rotation.x = 0.2;
+                // Hide runes, show Zs
+                elements.runes.forEach(r => r.visible = false);
+                elements.zs.forEach(z => z.visible = true);
+            }
+            else { 
+                elements.wizardGroup.position.y = 0; 
+                elements.wizardGroup.rotation.x = 0;
+                // Show runes, hide Zs
+                elements.runes.forEach(r => r.visible = true);
+                elements.zs.forEach(z => z.visible = false);
+            }
         }
 
         function animate() {
             requestAnimationFrame(animate); const time = Date.now() * 0.001;
-            if (elements.wizardGroup && !isFocusing) {
-                elements.wizardGroup.position.y = Math.sin(time) * 0.2 + (gameState.stamina < 30 ? -0.5 : 0);
-                elements.wizardGroup.rotation.y += 0.01 * spinSpeed;
-                if (elements.cape) elements.cape.rotation.x = 0.3 + Math.sin(time * 5) * 0.1;
-            } else if (elements.wizardGroup && isFocusing) {
-                elements.wizardGroup.rotation.y += 0.05; elements.wizardGroup.position.y = 1 + Math.sin(time * 5) * 0.1;
+            
+            if (elements.wizardGroup) {
+                // Runes Animation (Only if visible)
+                if (elements.runes && elements.runes[0].visible) {
+                    elements.runes.forEach(rune => {
+                        const rData = rune.userData;
+                        const activeSpeed = isFocusing ? rData.speed * 3 : rData.speed;
+                        const activeRadius = isFocusing ? rData.radius * 0.8 : rData.radius;
+                        
+                        rune.position.x = Math.cos(time * activeSpeed + rData.angle) * activeRadius;
+                        rune.position.z = Math.sin(time * activeSpeed + rData.angle) * activeRadius;
+                        rune.position.y = rData.yOffset + Math.sin(time * 2 + rData.angle) * 0.5;
+                        
+                        rune.rotation.x += 0.02;
+                        rune.rotation.y += 0.03;
+                    });
+                }
+
+                // Sleep Animation (Zs)
+                if (elements.zs && elements.zs[0].visible) {
+                    elements.zs.forEach((z, i) => {
+                        // Float up loop
+                        const loopTime = (time + i) % 3; // 3 sec loop
+                        z.position.y = 5 + loopTime * 0.8;
+                        z.position.x = 0.5 + Math.sin(loopTime * 3) * 0.2; // Wobble
+                        z.material.opacity = 1 - (loopTime / 3); // Fade out
+                    });
+                }
+
+                if (!isFocusing) {
+                    // Prevent rotation override during rest
+                    if (elements.wizardGroup.rotation.x === 0) { // Not sleeping
+                        elements.wizardGroup.position.y = Math.sin(time) * 0.2 + (gameState.stamina < 30 ? -0.5 : 0);
+                    }
+                    elements.wizardGroup.rotation.y += 0.01 * spinSpeed;
+                    if (elements.cape) elements.cape.rotation.x = 0.25 + Math.sin(time * 5) * 0.1;
+                } else {
+                    elements.wizardGroup.rotation.y += 0.05; elements.wizardGroup.position.y = 1 + Math.sin(time * 5) * 0.1;
+                }
             }
+            
             if (elements.particles) elements.particles.rotation.y = time * (isFocusing ? 0.2 : 0.05);
             renderer.render(scene, camera);
         }
@@ -856,6 +1037,14 @@
             document.getElementById('login-overlay').classList.remove('active');
             initWorld(); rpgSystem.updateUI();
         }
+        
+        // Key Listener for Admin Panel
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'a' || e.key === 'A')) {
+                const panel = document.getElementById('admin-panel');
+                panel.classList.toggle('active');
+            }
+        });
         
         window.addEventListener('resize', () => {
             if (camera && renderer) {
