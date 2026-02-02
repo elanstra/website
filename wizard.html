@@ -11,15 +11,14 @@
 
     <style>
         :root {
-            /* Palette based on reference image */
             --bg-dark: #09090b;
             --glass-bg: rgba(20, 20, 35, 0.65);
             --glass-border: rgba(255, 255, 255, 0.08);
             
-            --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); /* Purple/Pink */
-            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);   /* Gold */
-            --blue-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);   /* Blue */
-            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); /* Red */
+            --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --blue-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
             
             --text-main: #ffffff;
             --text-muted: #94a3b8;
@@ -66,6 +65,11 @@
         .hud__interactive { pointer-events: auto; }
 
         /* --- TOP STATS BAR --- */
+        .stats-container {
+            display: flex; flex-direction: column; gap: 10px; align-self: flex-start;
+            min-width: 320px; transition: all 0.3s ease;
+        }
+
         .stats-bar {
             display: flex; gap: 16px; 
             background: var(--glass-bg);
@@ -73,11 +77,8 @@
             padding: 12px 20px;
             border-radius: var(--radius-lg);
             backdrop-filter: blur(12px);
-            align-self: flex-start;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            min-width: 320px;
             align-items: center;
-            transition: all 0.3s ease;
         }
 
         .avatar-circle {
@@ -88,34 +89,38 @@
             font-size: 1.2rem; color: white;
             box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
             border: 2px solid rgba(255,255,255,0.2);
-            cursor: pointer; /* Hint that it's clickable */
+            cursor: pointer; flex-shrink: 0;
             transition: transform 0.1s;
-            flex-shrink: 0;
         }
         .avatar-circle:active { transform: scale(0.9); }
 
         .stat-group { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-        
         .char-name { font-weight: 800; font-size: 0.9rem; letter-spacing: 0.5px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
         .resource-row { display: flex; align-items: center; gap: 12px; margin-top: 2px; }
-        
         .bar-wrapper { flex: 1; display: flex; flex-direction: column; gap: 2px; }
         .bar-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; display: flex; justify-content: space-between; }
         
-        .progress-track {
-            width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%; width: 0%; border-radius: 10px; transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        /* Specific Colors */
+        .progress-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; border-radius: 10px; transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .xp-fill { background: var(--gold-gradient); box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
         .stamina-fill { background: var(--primary-gradient); box-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
         .stamina-fill.low { background: var(--danger-gradient); }
 
-        /* --- QUEST BOARD (Right Side) --- */
+        /* --- MOBILE TOGGLE BUTTON (Hidden on Desktop) --- */
+        .mobile-quest-toggle {
+            display: none; /* Desktop hidden */
+            background: rgba(20, 20, 35, 0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 20px;
+            border-radius: var(--radius-lg);
+            color: white; font-weight: 600; font-size: 0.9rem;
+            align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+        .mobile-quest-toggle i { color: #d946ef; margin-right: 8px; }
+
+        /* --- QUEST BOARD (Right Side - Desktop) --- */
         .quest-log {
             position: absolute; top: 100px; right: 24px; width: 360px;
             background: var(--glass-bg);
@@ -125,37 +130,25 @@
             max-height: 70vh; display: flex; flex-direction: column;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .quest-log.minimized {
-            max-height: 70px; /* Only header height */
-            background: rgba(20, 20, 35, 0.85); /* Less transparent when minimized */
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
         }
 
         .quest-header {
             padding: 20px; 
             border-bottom: 1px solid rgba(255,255,255,0.05); 
             display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; /* Clickable header for mobile */
         }
         .quest-header h3 { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; }
         
-        .header-actions { display: flex; gap: 8px; }
-
         .icon-btn {
             width: 32px; height: 32px; border-radius: 8px;
             background: rgba(255,255,255,0.1); border: none; color: white;
             cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
         }
         .icon-btn:hover { background: white; color: black; transform: translateY(-2px); }
-        
-        .toggle-btn { background: transparent; border: 1px solid rgba(255,255,255,0.1); }
-        .toggle-btn i { transition: transform 0.3s; }
-        .quest-log.minimized .toggle-btn i { transform: rotate(-180deg); }
+        .icon-btn.close-mobile { display: none; } /* Only show in mobile popup */
 
-        .quest-content { overflow-y: auto; flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 16px; opacity: 1; transition: opacity 0.2s; }
-        .quest-log.minimized .quest-content { opacity: 0; pointer-events: none; }
+        .quest-content { overflow-y: auto; flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
         
         .section-label { 
             font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; 
@@ -182,7 +175,6 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 1.1rem; color: white; flex-shrink: 0;
         }
-        
         .quest-details { flex: 1; display: flex; flex-direction: column; min-width: 0; }
         .quest-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .quest-reward { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
@@ -190,16 +182,13 @@
 
         .quest-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .action-play { 
-            color: #4ade80; background: rgba(74, 222, 128, 0.15); 
-            width: 32px; height: 32px; border-radius: 50%; 
+            color: #4ade80; background: rgba(74, 222, 128, 0.15); width: 32px; height: 32px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; 
         }
         .action-play:hover { background: #4ade80; color: black; box-shadow: 0 0 10px #4ade80; }
-        
         .action-del { color: #f87171; opacity: 0.5; cursor: pointer; padding: 5px; transition: 0.2s; }
         .action-del:hover { opacity: 1; transform: scale(1.1); }
 
-        /* Type Styling */
         .type-light .quest-icon { background: rgba(46, 204, 113, 0.2); color: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.1); }
         .type-medium .quest-icon { background: rgba(241, 196, 15, 0.2); color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.1); }
         .type-heavy .quest-icon { background: rgba(239, 68, 68, 0.2); color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.1); }
@@ -210,16 +199,11 @@
             margin-bottom: 40px; pointer-events: auto; width: 100%;
         }
 
-        /* The Timer Panel */
         .hud-timer-panel {
-            background: rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-top: 2px solid #8b5cf6;
-            border-radius: var(--radius-lg);
-            padding: 20px 40px;
+            background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1); border-top: 2px solid #8b5cf6;
+            border-radius: var(--radius-lg); padding: 20px 40px;
             display: flex; flex-direction: column; align-items: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             min-width: 300px;
         }
         .hud-timer-panel.hidden { display: none; }
@@ -232,24 +216,16 @@
         
         .timer-actions { display: flex; gap: 12px; margin-top: 15px; width: 100%; justify-content: center; }
 
-        .btn-pill {
-            padding: 8px 20px; border-radius: 50px; border: none; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: all 0.2s;
-        }
+        .btn-pill { padding: 8px 20px; border-radius: 50px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: all 0.2s; }
         .btn-finish { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
         .btn-finish:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
         .btn-cancel { background: rgba(255,255,255,0.1); color: #ccc; }
         .btn-cancel:hover { background: rgba(255,255,255,0.2); color: white; }
 
-        /* Quick Dock */
         .dock {
-            display: flex; gap: 12px; 
-            background: rgba(10, 10, 20, 0.7);
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 10px 16px; border-radius: 50px;
-            backdrop-filter: blur(10px);
-            transition: opacity 0.3s;
-            flex-wrap: wrap; justify-content: center;
+            display: flex; gap: 12px; background: rgba(10, 10, 20, 0.7);
+            border: 1px solid rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 50px;
+            backdrop-filter: blur(10px); transition: opacity 0.3s; flex-wrap: wrap; justify-content: center;
         }
         .dock.disabled { opacity: 0; pointer-events: none; transform: translateY(20px); }
 
@@ -259,19 +235,14 @@
             display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: all 0.2s;
         }
         .dock-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: white; transform: translateY(-3px); }
-        
         .dock-btn.start-light { border-color: #2ecc71; color: #2ecc71; }
         .dock-btn.start-light:hover { background: #2ecc71; color: #000; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); }
-
         .dock-btn.start-med { border-color: #f1c40f; color: #f1c40f; }
         .dock-btn.start-med:hover { background: #f1c40f; color: #000; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4); }
-
         .dock-btn.start-heavy { border-color: #ef4444; color: #ef4444; }
         .dock-btn.start-heavy:hover { background: #ef4444; color: #000; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-
         .dock-btn.start-rest { border-color: #8b5cf6; color: #8b5cf6; }
         .dock-btn.start-rest:hover { background: #8b5cf6; color: white; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); }
-
 
         /* --- MODALS & OVERLAYS --- */
         .modal-overlay {
@@ -302,7 +273,6 @@
         .modal-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; line-height: 1.5; }
 
         .input-group { margin-bottom: 24px; text-align: left; }
-        .input-label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 8px; margin-left: 4px; }
         .styled-input {
             width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #333;
             background: #09090b; color: white; font-size: 1rem; outline: none; transition: 0.2s;
@@ -314,7 +284,6 @@
             background: #27272a; border: 1px solid #3f3f46; border-radius: 12px; padding: 15px 5px; cursor: pointer; transition: 0.2s; position: relative;
         }
         .plan-option:hover { background: #3f3f46; transform: translateY(-2px); }
-        .plan-option.selected { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
         .plan-option h4 { font-size: 0.9rem; margin-bottom: 4px; }
         .plan-option p { font-size: 0.7rem; color: #888; margin: 0; }
         .plan-option i { font-size: 1.2rem; margin-bottom: 8px; display: block; }
@@ -352,20 +321,33 @@
         .close-icon { position: absolute; top: 15px; right: 15px; cursor: pointer; opacity: 0.5; font-size: 1.2rem; }
         .close-icon:hover { opacity: 1; }
 
-        /* --- MOBILE MEDIA QUERY --- */
+        /* --- MOBILE MEDIA QUERY (The Magic Fix) --- */
         @media (max-width: 768px) {
             .hud { padding: 16px; }
             .stats-bar { min-width: 0; width: 100%; padding: 10px 15px; }
             .avatar-circle { width: 40px; height: 40px; font-size: 1rem; }
             .char-name { font-size: 0.85rem; }
             
-            .quest-log {
-                width: calc(100% - 32px); /* Full width - padding */
-                top: 90px;
-                right: 16px; left: 16px;
-                max-height: 40vh;
+            /* Hide the Desktop Quest Log completely */
+            .quest-log { display: none; }
+            
+            /* Show Mobile Button */
+            .mobile-quest-toggle { display: flex; }
+            
+            /* Mobile Modal Styling */
+            .mobile-modal-active .quest-log {
+                display: flex;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                max-height: 100%; border-radius: 0;
+                z-index: 200;
+                border: none;
+                background: rgba(10, 10, 20, 0.95);
             }
-            .quest-header { padding: 10px 20px; }
+            .mobile-modal-active .quest-header {
+                padding-top: 90px; /* Space for close button */
+            }
+            .mobile-modal-active .icon-btn.close-mobile { display: flex; position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); width: 40px; height: 40px; }
             
             .bottom-hud { margin-bottom: 20px; width: 100%; }
             .hud-timer-panel { min-width: 0; width: 100%; padding: 15px; }
@@ -410,45 +392,45 @@
 
     <!-- HUD -->
     <div class="hud">
-        <!-- Top Stats Bar -->
-        <div class="stats-bar hud__interactive">
-            <div class="avatar-circle" onclick="rpgSystem.admin.clickTrigger()">
-                <i class="fas fa-user-astronaut"></i>
+        <!-- Top Stats Bar & Mobile Toggle -->
+        <div class="stats-container hud__interactive">
+            <div class="stats-bar">
+                <div class="avatar-circle" onclick="rpgSystem.admin.clickTrigger()">
+                    <i class="fas fa-user-astronaut"></i>
+                </div>
+                <div class="stat-group">
+                    <div class="char-name" id="char-name-display">Player One</div>
+                    <div class="resource-row">
+                        <div style="width: 20px; text-align:center; color:#fbbf24;"><i class="fas fa-crown"></i></div>
+                        <div class="bar-wrapper">
+                            <div class="bar-label"><span>Level <span id="level-val">1</span></span><span style="font-weight:400; opacity:0.7;"><span id="xp-current">0</span> XP</span></div>
+                            <div class="progress-track"><div class="progress-fill xp-fill" id="xp-bar" style="width: 0%"></div></div>
+                        </div>
+                    </div>
+                    <div class="resource-row">
+                        <div style="width: 20px; text-align:center; color:#8b5cf6;"><i class="fas fa-bolt"></i></div>
+                        <div class="bar-wrapper">
+                            <div class="bar-label"><span>Focus Energy</span></div>
+                            <div class="progress-track"><div class="progress-fill stamina-fill" id="stamina-bar" style="width: 100%"></div></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <div class="stat-group">
-                <div class="char-name" id="char-name-display">Player One</div>
-                
-                <!-- XP Bar -->
-                <div class="resource-row">
-                    <div style="width: 20px; text-align:center; color:#fbbf24;"><i class="fas fa-crown"></i></div>
-                    <div class="bar-wrapper">
-                        <div class="bar-label">
-                            <span>Level <span id="level-val">1</span></span>
-                            <span style="font-weight:400; opacity:0.7;"><span id="xp-current">0</span> XP</span>
-                        </div>
-                        <div class="progress-track"><div class="progress-fill xp-fill" id="xp-bar" style="width: 0%"></div></div>
-                    </div>
-                </div>
-
-                <!-- Stamina Bar -->
-                <div class="resource-row">
-                    <div style="width: 20px; text-align:center; color:#8b5cf6;"><i class="fas fa-bolt"></i></div>
-                    <div class="bar-wrapper">
-                        <div class="bar-label"><span>Focus Energy</span></div>
-                        <div class="progress-track"><div class="progress-fill stamina-fill" id="stamina-bar" style="width: 100%"></div></div>
-                    </div>
-                </div>
+            <!-- MOBILE QUEST TOGGLE BUTTON -->
+            <div class="mobile-quest-toggle" onclick="rpgSystem.toggleMobileQuestModal()">
+                <span><i class="fas fa-scroll"></i> Quest Board</span>
+                <span style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:4px; font-size:0.8rem;" id="active-quest-count">0</span>
             </div>
         </div>
 
-        <!-- Right Side Quest Log -->
+        <!-- Quest Log (Sidebar on Desktop / Modal on Mobile) -->
         <div class="quest-log hud__interactive" id="quest-log-panel">
-            <div class="quest-header" onclick="rpgSystem.toggleQuestLog()">
+            <button class="icon-btn close-mobile" onclick="rpgSystem.toggleMobileQuestModal()"><i class="fas fa-times"></i></button>
+            <div class="quest-header">
                 <h3><i class="fas fa-scroll" style="color:#d946ef"></i> Active Quests</h3>
                 <div class="header-actions">
-                    <button class="icon-btn" onclick="event.stopPropagation(); rpgSystem.openPlanner()"><i class="fas fa-plus"></i></button>
-                    <button class="icon-btn toggle-btn"><i class="fas fa-chevron-up"></i></button>
+                    <button class="icon-btn" onclick="rpgSystem.openPlanner()"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
             
@@ -467,83 +449,47 @@
 
         <!-- Bottom Controls -->
         <div class="bottom-hud">
-            <!-- TIMER PANEL (Hidden by default) -->
+            <!-- TIMER PANEL -->
             <div id="hud-timer-panel" class="hud-timer-panel hidden">
                 <div id="hud-timer-label" class="timer-label">Current Task</div>
                 <div id="hud-timer-val" class="timer-digits">25:00</div>
-                
                 <div class="timer-actions">
-                    <button class="btn-pill btn-cancel" onclick="rpgSystem.cancelAction()">
-                        <i class="fas fa-times"></i> Stop
-                    </button>
-                    <button id="hud-finish-btn" class="btn-pill btn-finish" onclick="rpgSystem.finishAction()">
-                        <i class="fas fa-check"></i> Complete
-                    </button>
+                    <button class="btn-pill btn-cancel" onclick="rpgSystem.cancelAction()"><i class="fas fa-times"></i> Stop</button>
+                    <button id="hud-finish-btn" class="btn-pill btn-finish" onclick="rpgSystem.finishAction()"><i class="fas fa-check"></i> Complete</button>
                 </div>
             </div>
 
             <!-- DOCK CONTROLS -->
             <div class="dock hud__interactive" id="controls-bar">
-                <button class="dock-btn start-light" onclick="rpgSystem.quickStart('light')">
-                    <i class="fas fa-seedling"></i> 5m
-                </button>
-                <button class="dock-btn start-med" onclick="rpgSystem.quickStart('medium')">
-                    <i class="fas fa-fire"></i> 15m
-                </button>
-                <button class="dock-btn start-heavy" onclick="rpgSystem.quickStart('heavy')">
-                    <i class="fas fa-dragon"></i> 25m
-                </button>
-                <button class="dock-btn start-rest" onclick="rpgSystem.startRest()">
-                    <i class="fas fa-moon"></i> Rest
-                </button>
+                <button class="dock-btn start-light" onclick="rpgSystem.quickStart('light')"><i class="fas fa-seedling"></i> 5m</button>
+                <button class="dock-btn start-med" onclick="rpgSystem.quickStart('medium')"><i class="fas fa-fire"></i> 15m</button>
+                <button class="dock-btn start-heavy" onclick="rpgSystem.quickStart('heavy')"><i class="fas fa-dragon"></i> 25m</button>
+                <div style="width:1px; background:rgba(255,255,255,0.2); height:20px; margin:0 5px;"></div>
+                <button class="dock-btn start-rest" onclick="rpgSystem.startRest()"><i class="fas fa-moon"></i> Rest</button>
             </div>
         </div>
     </div>
 
-    <!-- LOGIN OVERLAY -->
+    <!-- OVERLAYS (Login, Planner) -->
     <div class="modal-overlay active" id="login-overlay">
         <div class="modal-card">
-            <div class="icon-circle" style="font-size: 3rem; margin-bottom: 20px; background: -webkit-linear-gradient(#8b5cf6, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                <i class="fas fa-dungeon"></i>
-            </div>
+            <div class="icon-circle" style="font-size: 3rem; margin-bottom: 20px; background: -webkit-linear-gradient(#8b5cf6, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><i class="fas fa-dungeon"></i></div>
             <h2 class="modal-title">RPG Pomodoro</h2>
-            <p class="modal-desc">Enter the realm of focus. Complete tasks to level up your wizard.</p>
-            
-            <div class="input-group">
-                <input type="text" class="styled-input" id="char-name-input" placeholder="Enter Character Name..." autocomplete="off">
-            </div>
-            
+            <p class="modal-desc">Enter the realm of focus. Complete tasks to level up.</p>
+            <div class="input-group"><input type="text" class="styled-input" id="char-name-input" placeholder="Character Name..." autocomplete="off"></div>
             <button class="btn-full" onclick="startGame()">Enter World <i class="fas fa-arrow-right" style="margin-left:8px;"></i></button>
         </div>
     </div>
 
-    <!-- PLANNER MODAL -->
     <div class="modal-overlay" id="planner-modal">
         <div class="modal-card">
             <i class="fas fa-times close-icon" onclick="document.getElementById('planner-modal').classList.remove('active')"></i>
             <h2 class="modal-title">New Quest</h2>
-            <p class="modal-desc">Define your task and choose the difficulty.</p>
-            
-            <div class="input-group">
-                <input type="text" class="styled-input" id="plan-input" placeholder="e.g. Fix Navigation Bug..." autocomplete="off">
-            </div>
-
+            <div class="input-group"><input type="text" class="styled-input" id="plan-input" placeholder="e.g. Fix Bug..." autocomplete="off"></div>
             <div class="plan-grid">
-                <div class="plan-option" onclick="rpgSystem.addPlannedTask('light')">
-                    <i class="fas fa-seedling" style="color:#2ecc71;"></i>
-                    <h4>Light</h4>
-                    <p>5 min</p>
-                </div>
-                <div class="plan-option" onclick="rpgSystem.addPlannedTask('medium')">
-                    <i class="fas fa-fire" style="color:#f1c40f;"></i>
-                    <h4>Medium</h4>
-                    <p>15 min</p>
-                </div>
-                <div class="plan-option" onclick="rpgSystem.addPlannedTask('heavy')">
-                    <i class="fas fa-dragon" style="color:#ef4444;"></i>
-                    <h4>Heavy</h4>
-                    <p>25 min</p>
-                </div>
+                <div class="plan-option" onclick="rpgSystem.addPlannedTask('light')"><i class="fas fa-seedling" style="color:#2ecc71;"></i><h4>Light</h4><p>5 min</p></div>
+                <div class="plan-option" onclick="rpgSystem.addPlannedTask('medium')"><i class="fas fa-fire" style="color:#f1c40f;"></i><h4>Medium</h4><p>15 min</p></div>
+                <div class="plan-option" onclick="rpgSystem.addPlannedTask('heavy')"><i class="fas fa-dragon" style="color:#ef4444;"></i><h4>Heavy</h4><p>25 min</p></div>
             </div>
         </div>
     </div>
@@ -554,224 +500,115 @@
 
     <script>
         // --- GAME LOGIC ---
-        const gameState = {
-            name: "Dev",
-            level: 1,
-            xp: 0,
-            xpToNext: 1000,
-            stamina: 100,
-            plannedTasks: [],
-            completedTasks: [],
-            activeTask: null,
-            timerInterval: null,
-            isQuestLogOpen: true
-        };
-
-        const gearUnlocks = {
-            2: "Magic Staff",
-            3: "Mystic Cape",
-            5: "Crown of Focus",
-            10: "God Mode Aura"
-        };
-
-        const taskDefinitions = {
-            light: { t: "Light", m: 5, x: 50, s: 5, icon: "fa-seedling" },
-            medium: { t: "Medium", m: 15, x: 150, s: 15, icon: "fa-fire" },
-            heavy: { t: "Heavy", m: 25, x: 500, s: 30, icon: "fa-dragon" }
-        };
+        const gameState = { name: "Dev", level: 1, xp: 0, xpToNext: 1000, stamina: 100, plannedTasks: [], completedTasks: [], activeTask: null, timerInterval: null };
+        const gearUnlocks = { 2: "Magic Staff", 3: "Mystic Cape", 5: "Crown of Focus", 10: "God Mode Aura" };
+        const taskDefinitions = { light: { t: "Light", m: 5, x: 50, s: 5, icon: "fa-seedling" }, medium: { t: "Medium", m: 15, x: 150, s: 15, icon: "fa-fire" }, heavy: { t: "Heavy", m: 25, x: 500, s: 30, icon: "fa-dragon" } };
 
         const rpgSystem = {
-            // ADMIN FUNCTIONS
             admin: {
-                clicks: 0,
-                clickTimer: null,
+                clicks: 0, clickTimer: null,
                 clickTrigger: () => {
-                    rpgSystem.admin.clicks++;
-                    if(rpgSystem.admin.clicks >= 5) {
-                        rpgSystem.admin.clicks = 0;
-                        document.getElementById('admin-panel').classList.toggle('active');
-                        rpgSystem.showToast("Admin Mode Activated", "fa-user-secret");
-                    }
-                    clearTimeout(rpgSystem.admin.clickTimer);
-                    rpgSystem.admin.clickTimer = setTimeout(() => { rpgSystem.admin.clicks = 0; }, 500);
+                    rpgSystem.admin.clicks++; if(rpgSystem.admin.clicks >= 5) { rpgSystem.admin.clicks = 0; document.getElementById('admin-panel').classList.toggle('active'); rpgSystem.showToast("Admin Mode Active", "fa-user-secret"); }
+                    clearTimeout(rpgSystem.admin.clickTimer); rpgSystem.admin.clickTimer = setTimeout(() => { rpgSystem.admin.clicks = 0; }, 500);
                 },
-                addXP: (amount) => { rpgSystem.showToast(`Admin: +${amount} XP`, "fa-user-secret"); gameState.xp += amount; if(gameState.xp >= gameState.xpToNext) rpgSystem.levelUp(); rpgSystem.updateUI(); },
-                forceLevelUp: () => { rpgSystem.showToast("Admin: Level Up", "fa-arrow-up"); gameState.xp = gameState.xpToNext; rpgSystem.levelUp(); },
-                fillStamina: () => { rpgSystem.showToast("Admin: Stamina Refilled", "fa-bolt"); gameState.stamina = 100; rpgSystem.updateUI(); },
-                drainStamina: () => { rpgSystem.showToast("Admin: Stamina Drained", "fa-battery-empty"); gameState.stamina = 5; rpgSystem.updateUI(); }
+                addXP: (amount) => { rpgSystem.showToast(`Admin: +${amount} XP`); gameState.xp += amount; if(gameState.xp >= gameState.xpToNext) rpgSystem.levelUp(); rpgSystem.updateUI(); },
+                forceLevelUp: () => { rpgSystem.showToast("Admin: Level Up"); gameState.xp = gameState.xpToNext; rpgSystem.levelUp(); },
+                fillStamina: () => { rpgSystem.showToast("Admin: Full Stamina"); gameState.stamina = 100; rpgSystem.updateUI(); },
+                drainStamina: () => { rpgSystem.showToast("Admin: Drained"); gameState.stamina = 5; rpgSystem.updateUI(); }
             },
 
             updateUI: () => {
                 document.getElementById('char-name-display').innerText = gameState.name;
                 document.getElementById('level-val').innerText = gameState.level;
                 document.getElementById('xp-current').innerText = gameState.xp;
-                
                 const xpPercent = (gameState.xp / gameState.xpToNext) * 100;
                 document.getElementById('xp-bar').style.width = `${xpPercent}%`;
-                
                 const stamBar = document.getElementById('stamina-bar');
                 stamBar.style.width = `${gameState.stamina}%`;
                 if (gameState.stamina < 30) stamBar.classList.add('low'); else stamBar.classList.remove('low');
-
                 if (typeof scene !== 'undefined' && scene && scene.fog) {
                     scene.fog.color.setHex(gameState.stamina < 30 ? 0x000000 : 0x1e1b4b);
                     scene.fog.density = gameState.stamina < 30 ? 0.08 : 0.02;
                 }
-
+                
+                document.getElementById('active-quest-count').innerText = gameState.plannedTasks.length;
                 rpgSystem.renderBoards();
                 updateWizardGear();
             },
 
             renderBoards: () => {
-                const pList = document.getElementById('planned-list');
-                pList.innerHTML = '';
+                const pList = document.getElementById('planned-list'); pList.innerHTML = '';
                 if(gameState.plannedTasks.length === 0) pList.innerHTML = `<div style="text-align:center; padding:10px; color:#555; font-size:0.7rem;">No active quests</div>`;
-
                 gameState.plannedTasks.forEach(t => {
                     const def = taskDefinitions[t.type];
-                    const div = document.createElement('div');
-                    div.className = `quest-card type-${t.type}`;
-                    div.innerHTML = `
-                        <div class="quest-icon"><i class="fas ${def.icon}"></i></div>
-                        <div class="quest-details">
-                            <div class="quest-name">${t.title}</div>
-                            <div class="quest-reward"><span class="highlight-xp">+${def.x} XP</span> • ${def.m} min</div>
-                        </div>
-                        <div class="quest-actions">
-                            <div class="action-play" onclick="rpgSystem.startPlannedTask(${t.id})"><i class="fas fa-play" style="font-size:0.7rem;"></i></div>
-                            <div class="action-del" onclick="rpgSystem.deletePlannedTask(${t.id})"><i class="fas fa-trash"></i></div>
-                        </div>
-                    `;
+                    const div = document.createElement('div'); div.className = `quest-card type-${t.type}`;
+                    div.innerHTML = `<div class="quest-icon"><i class="fas ${def.icon}"></i></div><div class="quest-details"><div class="quest-name">${t.title}</div><div class="quest-reward"><span class="highlight-xp">+${def.x} XP</span> • ${def.m} min</div></div><div class="quest-actions"><div class="action-play" onclick="rpgSystem.startPlannedTask(${t.id})"><i class="fas fa-play" style="font-size:0.7rem;"></i></div><div class="action-del" onclick="rpgSystem.deletePlannedTask(${t.id})"><i class="fas fa-trash"></i></div></div>`;
                     pList.appendChild(div);
                 });
-
-                const hList = document.getElementById('history-list');
-                hList.innerHTML = '';
+                const hList = document.getElementById('history-list'); hList.innerHTML = '';
                 gameState.completedTasks.slice(-3).reverse().forEach(t => {
-                    const div = document.createElement('div');
-                    div.className = `quest-card type-${t.type}`;
-                    div.style.opacity = "0.7";
+                    const div = document.createElement('div'); div.className = `quest-card type-${t.type}`; div.style.opacity = "0.7";
                     div.innerHTML = `<div class="quest-icon"><i class="fas fa-check"></i></div><div class="quest-details"><div class="quest-name" style="text-decoration:line-through;">${t.title}</div></div>`;
                     hList.appendChild(div);
                 });
             },
 
-            toggleQuestLog: () => {
-                const log = document.getElementById('quest-log-panel');
-                if (log.classList.contains('minimized')) {
-                    log.classList.remove('minimized');
-                } else {
-                    log.classList.add('minimized');
-                }
+            toggleMobileQuestModal: () => {
+                document.body.classList.toggle('mobile-modal-active');
             },
 
             openPlanner: () => {
-                document.getElementById('plan-input').value = "";
-                document.getElementById('planner-modal').classList.add('active');
-                document.getElementById('plan-input').focus();
+                // If on mobile, close the quest modal first so planner modal can show
+                if(window.innerWidth <= 768) document.body.classList.remove('mobile-modal-active');
+                document.getElementById('plan-input').value = ""; document.getElementById('planner-modal').classList.add('active'); document.getElementById('plan-input').focus();
             },
 
             addPlannedTask: (type) => {
                 const title = document.getElementById('plan-input').value || `${type.charAt(0).toUpperCase() + type.slice(1)} Task`;
-                const newTask = {
-                    id: Date.now(), title: title, type: type,
-                    xp: taskDefinitions[type].x, cost: taskDefinitions[type].s, duration: taskDefinitions[type].m * 60
-                };
+                const newTask = { id: Date.now(), title: title, type: type, xp: taskDefinitions[type].x, cost: taskDefinitions[type].s, duration: taskDefinitions[type].m * 60 };
                 gameState.plannedTasks.push(newTask);
                 document.getElementById('planner-modal').classList.remove('active');
                 rpgSystem.updateUI();
                 rpgSystem.showToast("Quest Added", "fa-scroll");
             },
 
-            deletePlannedTask: (id) => {
-                gameState.plannedTasks = gameState.plannedTasks.filter(t => t.id !== id);
-                rpgSystem.updateUI();
-            },
+            deletePlannedTask: (id) => { gameState.plannedTasks = gameState.plannedTasks.filter(t => t.id !== id); rpgSystem.updateUI(); },
 
             startPlannedTask: (id) => {
-                const task = gameState.plannedTasks.find(t => t.id === id);
-                if (!task) return;
-                if (gameState.stamina <= 10) return rpgSystem.showToast("Low Energy! Rest first.", "fa-battery-empty");
-
-                gameState.activeTask = { ...task };
-                gameState.plannedTasks = gameState.plannedTasks.filter(t => t.id !== id);
-                rpgSystem.updateUI();
+                const task = gameState.plannedTasks.find(t => t.id === id); if (!task) return;
+                if (gameState.stamina <= 10) return rpgSystem.showToast("Rest needed!", "fa-battery-empty");
+                gameState.activeTask = { ...task }; gameState.plannedTasks = gameState.plannedTasks.filter(t => t.id !== id);
+                rpgSystem.updateUI(); 
+                if(window.innerWidth <= 768) document.body.classList.remove('mobile-modal-active'); // Close modal on start
                 rpgSystem.initTimerUI(false);
             },
 
             quickStart: (type) => {
-                if (gameState.stamina <= 10) return rpgSystem.showToast("Low Energy! Rest first.", "fa-battery-empty");
-                const def = taskDefinitions[type];
-                gameState.activeTask = { 
-                    title: "Quick Quest", type, xp: def.x, cost: def.s, duration: def.m * 60 
-                };
+                if (gameState.stamina <= 10) return rpgSystem.showToast("Rest needed!", "fa-battery-empty");
+                const def = taskDefinitions[type]; gameState.activeTask = { title: "Quick Quest", type, xp: def.x, cost: def.s, duration: def.m * 60 };
                 rpgSystem.initTimerUI(false);
             },
 
-            startRest: () => {
-                gameState.activeTask = { type: 'rest', xp: 0, cost: 0, duration: 5 * 60, title: "Mana Recharge" };
-                rpgSystem.initTimerUI(true);
-            },
+            startRest: () => { gameState.activeTask = { type: 'rest', xp: 0, cost: 0, duration: 5 * 60, title: "Mana Recharge" }; rpgSystem.initTimerUI(true); },
 
             initTimerUI: (isRest) => {
-                document.getElementById('controls-bar').classList.add('disabled');
-                document.getElementById('hud-timer-panel').classList.remove('hidden');
-                
-                // Auto collapse quest log on mobile when timer starts
-                if (window.innerWidth <= 768) {
-                    document.getElementById('quest-log-panel').classList.add('minimized');
-                }
-                
-                if (isRest) {
-                    document.getElementById('hud-timer-label').innerText = "MEDITATING...";
-                    document.getElementById('hud-finish-btn').style.display = 'none';
-                    startWizardRest(true);
-                } else {
-                    document.getElementById('hud-timer-label').innerText = gameState.activeTask.title;
-                    document.getElementById('hud-finish-btn').style.display = 'flex';
-                    startWizardFocus(true);
-                }
-
-                let timeLeft = gameState.activeTask.duration;
-                updateTimerDisplay(timeLeft);
-
+                document.getElementById('controls-bar').classList.add('disabled'); document.getElementById('hud-timer-panel').classList.remove('hidden');
+                if (isRest) { document.getElementById('hud-timer-label').innerText = "MEDITATING..."; document.getElementById('hud-finish-btn').style.display = 'none'; startWizardRest(true); }
+                else { document.getElementById('hud-timer-label').innerText = gameState.activeTask.title; document.getElementById('hud-finish-btn').style.display = 'flex'; startWizardFocus(true); }
+                let timeLeft = gameState.activeTask.duration; updateTimerDisplay(timeLeft);
                 if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-                gameState.timerInterval = setInterval(() => {
-                    timeLeft--;
-                    updateTimerDisplay(timeLeft);
-                    if (timeLeft <= 0) {
-                        clearInterval(gameState.timerInterval);
-                        rpgSystem.finishAction();
-                    }
-                }, 1000); 
+                gameState.timerInterval = setInterval(() => { timeLeft--; updateTimerDisplay(timeLeft); if (timeLeft <= 0) { clearInterval(gameState.timerInterval); rpgSystem.finishAction(); } }, 1000);
             },
 
             finishAction: () => {
-                if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-                const task = gameState.activeTask;
-                
-                document.getElementById('hud-timer-panel').classList.add('hidden');
-                document.getElementById('controls-bar').classList.remove('disabled');
-                
-                startWizardFocus(false);
-                startWizardRest(false);
-
-                if (task.type === 'rest') {
-                    gameState.stamina = 100;
-                    rpgSystem.showToast("Mana Restored Full", "fa-bolt");
-                } else {
-                    gameState.stamina = Math.max(0, gameState.stamina - task.cost);
-                    gameState.xp += task.xp;
-                    gameState.completedTasks.push({ title: task.title, xp: task.xp, type: task.type });
-                    rpgSystem.showToast(`Quest Complete! +${task.xp} XP`, "fa-check-circle");
-                    
-                    if(elements.wizardGroup) {
-                        elements.wizardGroup.position.y += 1;
-                        const flash = new THREE.PointLight(0xffffff, 2, 10);
-                        flash.position.set(0,2,0);
-                        scene.add(flash);
-                        setTimeout(() => scene.remove(flash), 200);
-                    }
+                if (gameState.timerInterval) clearInterval(gameState.timerInterval); const task = gameState.activeTask;
+                document.getElementById('hud-timer-panel').classList.add('hidden'); document.getElementById('controls-bar').classList.remove('disabled');
+                startWizardFocus(false); startWizardRest(false);
+                if (task.type === 'rest') { gameState.stamina = 100; rpgSystem.showToast("Mana Restored Full", "fa-bolt"); }
+                else {
+                    gameState.stamina = Math.max(0, gameState.stamina - task.cost); gameState.xp += task.xp;
+                    gameState.completedTasks.push({ title: task.title, xp: task.xp, type: task.type }); rpgSystem.showToast(`Quest Complete! +${task.xp} XP`, "fa-check-circle");
+                    if(elements.wizardGroup) { elements.wizardGroup.position.y += 1; const flash = new THREE.PointLight(0xffffff, 2, 10); flash.position.set(0,2,0); scene.add(flash); setTimeout(() => scene.remove(flash), 200); }
                     if (gameState.xp >= gameState.xpToNext) rpgSystem.levelUp();
                 }
                 rpgSystem.updateUI();
@@ -779,117 +616,74 @@
 
             cancelAction: () => {
                 if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-                document.getElementById('hud-timer-panel').classList.add('hidden');
-                document.getElementById('controls-bar').classList.remove('disabled');
-                startWizardFocus(false);
-                startWizardRest(false);
-                rpgSystem.showToast("Focus Interrupted", "fa-ban");
-                rpgSystem.updateUI();
+                document.getElementById('hud-timer-panel').classList.add('hidden'); document.getElementById('controls-bar').classList.remove('disabled');
+                startWizardFocus(false); startWizardRest(false); rpgSystem.showToast("Focus Interrupted", "fa-ban"); rpgSystem.updateUI();
             },
 
             levelUp: () => {
-                gameState.level++;
-                gameState.xp -= gameState.xpToNext;
-                gameState.xpToNext = Math.floor(gameState.xpToNext * 1.3);
+                gameState.level++; gameState.xp -= gameState.xpToNext; gameState.xpToNext = Math.floor(gameState.xpToNext * 1.3);
                 rpgSystem.showToast(`Level Up! Lvl ${gameState.level}`, "fa-level-up-alt");
                 if(gearUnlocks[gameState.level]) setTimeout(() => rpgSystem.showToast(`Unbox: ${gearUnlocks[gameState.level]}`, "fa-box-open"), 1500);
                 rpgSystem.updateUI();
             },
 
             showToast: (msg, icon) => {
-                const div = document.createElement('div');
-                div.className = 'toast'; 
-                div.innerHTML = `<i class="fas ${icon || 'fa-info-circle'}"></i> ${msg}`;
-                document.getElementById('toast-container').appendChild(div);
-                setTimeout(() => div.remove(), 3000);
+                const div = document.createElement('div'); div.className = 'toast'; div.innerHTML = `<i class="fas ${icon || 'fa-info-circle'}"></i> ${msg}`;
+                document.getElementById('toast-container').appendChild(div); setTimeout(() => div.remove(), 3000);
             }
         };
 
         function updateTimerDisplay(seconds) {
-            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0'); const s = (seconds % 60).toString().padStart(2, '0');
             document.getElementById('hud-timer-val').innerText = `${m}:${s}`;
         }
 
         // --- 3D ENGINE ---
-        let scene, camera, renderer, elements = {};
-        let spinSpeed = 1; let isFocusing = false;
-        let cameraAngle = 0; const cameraRadius = 13;
-        let isDragging = false; let previousMouseX = 0;
+        let scene, camera, renderer, elements = {}; let spinSpeed = 1; let isFocusing = false;
+        let cameraAngle = 0; const cameraRadius = 13; let isDragging = false; let previousMouseX = 0;
 
         function initWorld() {
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x1e1b4b, 0.02); // Dark blue fog
-
+            scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x1e1b4b, 0.02);
             camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
             
-            // Initial Camera Position
-            updateCameraPosition(); 
-            // Mobile Specific Tweaks on Init
-            if(window.innerWidth <= 768) {
-                // Adjust LookAt target to shift wizard down visually
-                camera.lookAt(0, 4, 0); 
-            } else {
-                camera.lookAt(0, 2, 0);
-            }
+            // Standard centered view
+            camera.position.set(0, 4, 13);
+            camera.lookAt(0, 2, 0);
 
             renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
+            renderer.setSize(window.innerWidth, window.innerHeight); renderer.shadowMap.enabled = true;
 
             const canvas = document.getElementById('game-canvas');
             canvas.addEventListener('mousedown', (e) => { isDragging = true; previousMouseX = e.clientX; canvas.classList.add('grabbing'); });
-            window.addEventListener('touchstart', (e) => { isDragging = true; previousMouseX = e.touches[0].clientX; }, {passive: false}); // Mobile Touch support
-            
-            window.addEventListener('mousemove', (e) => {
-                if (isDragging) {
-                    cameraAngle -= (e.clientX - previousMouseX) * 0.005;
-                    updateCameraPosition();
-                    previousMouseX = e.clientX;
-                }
-            });
-            window.addEventListener('touchmove', (e) => {
-                if (isDragging) {
-                    cameraAngle -= (e.touches[0].clientX - previousMouseX) * 0.005;
-                    updateCameraPosition();
-                    previousMouseX = e.touches[0].clientX;
-                }
-            }, {passive: false});
-
+            window.addEventListener('touchstart', (e) => { isDragging = true; previousMouseX = e.touches[0].clientX; }, {passive: false});
+            window.addEventListener('mousemove', (e) => { if (isDragging) { cameraAngle -= (e.clientX - previousMouseX) * 0.005; updateCameraPosition(); previousMouseX = e.clientX; } });
+            window.addEventListener('touchmove', (e) => { if (isDragging) { cameraAngle -= (e.touches[0].clientX - previousMouseX) * 0.005; updateCameraPosition(); previousMouseX = e.touches[0].clientX; } }, {passive: false});
             window.addEventListener('mouseup', () => { isDragging = false; canvas.classList.remove('grabbing'); });
             window.addEventListener('touchend', () => { isDragging = false; });
 
             const ambient = new THREE.AmbientLight(0x404040, 1.5); scene.add(ambient);
             const moonLight = new THREE.DirectionalLight(0xaaccff, 0.8); moonLight.position.set(-10, 20, -10); moonLight.castShadow = true; scene.add(moonLight);
-            
             elements.magicLight = new THREE.PointLight(0xd946ef, 0, 20); elements.magicLight.position.set(0, 5, 0); scene.add(elements.magicLight);
 
             createLandscape(); createWizard(); animate();
         }
 
         function updateCameraPosition() {
+            // Stable rotation around the center
             camera.position.set(Math.sin(cameraAngle) * cameraRadius, 4, Math.cos(cameraAngle) * cameraRadius);
-            
-            // Keep correct LookAt during rotation
-            if(window.innerWidth <= 768) {
-                camera.lookAt(0, 4, 0); 
-            } else {
-                camera.lookAt(0, 2, 0);
-            }
+            camera.lookAt(0, 2, 0);
         }
 
         function createLandscape() {
             const ground = new THREE.Mesh(new THREE.CylinderGeometry(40, 40, 1, 64), new THREE.MeshStandardMaterial({ color: 0x0f172a, flatShading: true }));
             ground.position.y = -0.5; ground.receiveShadow = true; scene.add(ground);
-
             for(let i=0; i<80; i++) {
                 const angle = Math.random() * Math.PI * 2; const radius = 6 + Math.random() * 30;
                 const x = Math.cos(angle) * radius; const z = Math.sin(angle) * radius;
                 if (Math.abs(x) < 3 && z > 5 && z < 15) continue;
-
                 if (Math.random() > 0.3) {
                     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 1.5, 6), new THREE.MeshStandardMaterial({ color: 0x1e1b4b }));
-                    const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5, 4, 8), new THREE.MeshStandardMaterial({ color: 0x334155 })); // Slate color
+                    const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5, 4, 8), new THREE.MeshStandardMaterial({ color: 0x334155 }));
                     leaves.position.y = 2.5; trunk.add(leaves); trunk.position.set(x, 0.75, z); trunk.castShadow = true;
                     const s = 0.8 + Math.random() * 0.5; trunk.scale.set(s,s,s); scene.add(trunk);
                 } else {
@@ -897,7 +691,6 @@
                     rock.position.set(x, 0, z); rock.rotation.set(Math.random(), Math.random(), Math.random()); scene.add(rock);
                 }
             }
-            
             const pGeo = new THREE.BufferGeometry(); const pCount = 300; const pPos = new Float32Array(pCount * 3);
             for(let i=0; i<pCount*3; i++) pPos[i] = (Math.random() - 0.5) * 60;
             pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
@@ -906,172 +699,63 @@
         }
 
         function createZTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 64; canvas.height = 64;
-            const ctx = canvas.getContext('2d');
-            ctx.font = 'bold 40px sans-serif';
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            ctx.fillText('Z', 32, 48);
+            const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d'); ctx.font = 'bold 40px sans-serif'; ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.fillText('Z', 32, 48);
             return new THREE.CanvasTexture(canvas);
         }
 
         function createWizard() {
             const group = new THREE.Group();
-            
             const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 1.5, 3.5, 8), new THREE.MeshStandardMaterial({ color: 0x1e3a8a, flatShading: true }));
             robe.position.y = 1.75; robe.castShadow = true; group.add(robe);
-
             const shoulders = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.6, 1.0, 8), new THREE.MeshStandardMaterial({ color: 0x4c1d95, flatShading: true }));
             shoulders.position.y = 3.0; group.add(shoulders);
-
             const head = new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffccaa }));
             head.position.y = 3.8; group.add(head);
-
-            const eyeGeo = new THREE.BoxGeometry(0.15, 0.08, 0.1);
-            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const eyeGeo = new THREE.BoxGeometry(0.15, 0.08, 0.1); const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
             const eyeL = new THREE.Mesh(eyeGeo, eyeMat); eyeL.position.set(0.25, 3.9, 0.6); eyeL.rotation.y = 0.2; group.add(eyeL);
             const eyeR = new THREE.Mesh(eyeGeo, eyeMat); eyeR.position.set(-0.25, 3.9, 0.6); eyeR.rotation.y = -0.2; group.add(eyeR);
-
             const hatGroup = new THREE.Group();
             hatGroup.add(new THREE.Mesh(new THREE.ConeGeometry(1.0, 2.5, 8), new THREE.MeshStandardMaterial({ color: 0x312e81 })).translateY(1.25).rotateX(-0.2));
             hatGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.1, 8), new THREE.MeshStandardMaterial({ color: 0x312e81 })));
             hatGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.15, 8), new THREE.MeshStandardMaterial({ color: 0xfbbf24 })).translateY(0.2));
             hatGroup.position.y = 4.3; group.add(hatGroup);
-
-            elements.runes = [];
-            for(let i=0; i<3; i++) {
-                const rune = new THREE.Mesh(new THREE.OctahedronGeometry(0.3), new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true }));
-                rune.userData = { angle: (i / 3) * Math.PI * 2, speed: 1.5, radius: 2.5, yOffset: 2 };
-                group.add(rune); elements.runes.push(rune);
-            }
-
-            const zTex = createZTexture();
-            const zMat = new THREE.SpriteMaterial({ map: zTex, transparent: true, opacity: 0 });
-            elements.zs = [];
-            for(let i=0; i<3; i++) {
-                const zSprite = new THREE.Sprite(zMat.clone());
-                zSprite.scale.set(0.5, 0.5, 1);
-                zSprite.position.set(0.5, 5, 0); zSprite.visible = false;
-                zSprite.userData = { offset: i * 2, speed: 0.8 };
-                group.add(zSprite); elements.zs.push(zSprite);
-            }
-
+            elements.runes = []; for(let i=0; i<3; i++) { const rune = new THREE.Mesh(new THREE.OctahedronGeometry(0.3), new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true })); rune.userData = { angle: (i / 3) * Math.PI * 2, speed: 1.5, radius: 2.5, yOffset: 2 }; group.add(rune); elements.runes.push(rune); }
+            const zTex = createZTexture(); const zMat = new THREE.SpriteMaterial({ map: zTex, transparent: true, opacity: 0 }); elements.zs = []; for(let i=0; i<3; i++) { const zSprite = new THREE.Sprite(zMat.clone()); zSprite.scale.set(0.5, 0.5, 1); zSprite.position.set(0.5, 5, 0); zSprite.visible = false; zSprite.userData = { offset: i * 2, speed: 0.8 }; group.add(zSprite); elements.zs.push(zSprite); }
             elements.handR = new THREE.Group(); elements.handR.position.set(1.4, 2.5, 0.5); group.add(elements.handR);
             elements.backSlot = new THREE.Group(); elements.backSlot.position.set(0, 3.0, -0.8); group.add(elements.backSlot);
             elements.headSlot = new THREE.Group(); elements.headSlot.position.set(0, 5.0, 0); group.add(elements.headSlot);
-
             scene.add(group); elements.wizardGroup = group;
         }
 
         function updateWizardGear() {
-            if (gameState.level >= 2 && !elements.hasStaff) {
-                const staff = new THREE.Group();
-                staff.add(new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 4.5), new THREE.MeshStandardMaterial({ color: 0x475569 })));
-                const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.35), new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.8 }));
-                gem.position.y = 2.2; staff.add(gem);
-                staff.rotation.set(0.2, 0, -0.3); elements.handR.add(staff); elements.hasStaff = true;
-            }
-            if (gameState.level >= 3 && !elements.hasCape) {
-                const cape = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.8, 0.1), new THREE.MeshStandardMaterial({ color: 0x6366f1 }));
-                cape.position.y = -1.2; cape.rotation.x = 0.25; elements.backSlot.add(cape); elements.cape = cape; elements.hasCape = true;
-            }
-            if (gameState.level >= 5 && !elements.hasCrown) {
-                const crown = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.05, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffb020 }));
-                crown.rotation.x = Math.PI / 2; crown.position.y = -0.2; elements.headSlot.add(crown); elements.hasCrown = true;
-            }
+            if (gameState.level >= 2 && !elements.hasStaff) { const staff = new THREE.Group(); staff.add(new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 4.5), new THREE.MeshStandardMaterial({ color: 0x475569 }))); const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.35), new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.8 })); gem.position.y = 2.2; staff.add(gem); staff.rotation.set(0.2, 0, -0.3); elements.handR.add(staff); elements.hasStaff = true; }
+            if (gameState.level >= 3 && !elements.hasCape) { const cape = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.8, 0.1), new THREE.MeshStandardMaterial({ color: 0x6366f1 })); cape.position.y = -1.2; cape.rotation.x = 0.25; elements.backSlot.add(cape); elements.cape = cape; elements.hasCape = true; }
+            if (gameState.level >= 5 && !elements.hasCrown) { const crown = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.05, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffb020 })); crown.rotation.x = Math.PI / 2; crown.position.y = -0.2; elements.headSlot.add(crown); elements.hasCrown = true; }
         }
 
-        function startWizardFocus(active) {
-            isFocusing = active;
-            if(active) {
-                elements.wizardGroup.position.y = 1; elements.magicLight.intensity = 2; elements.particles.material.color.setHex(0xd946ef);
-                elements.runes.forEach(r => { r.visible = true; r.material.color.setHex(0xd946ef); r.material.wireframe = false; });
-                elements.zs.forEach(z => z.visible = false);
-            } else {
-                elements.wizardGroup.position.y = 0; elements.magicLight.intensity = 0; elements.particles.material.color.setHex(0xc084fc);
-                elements.runes.forEach(r => { r.visible = true; r.material.color.setHex(0x00ffff); r.material.wireframe = true; });
-                elements.zs.forEach(z => z.visible = false);
-            }
-        }
-
-        function startWizardRest(active) {
-            if(active) { 
-                elements.wizardGroup.position.y = -0.5; elements.wizardGroup.rotation.x = 0.2;
-                elements.runes.forEach(r => r.visible = false);
-                elements.zs.forEach(z => z.visible = true);
-            } else { 
-                elements.wizardGroup.position.y = 0; elements.wizardGroup.rotation.x = 0;
-                elements.runes.forEach(r => r.visible = true);
-                elements.zs.forEach(z => z.visible = false);
-            }
-        }
+        function startWizardFocus(active) { isFocusing = active; if(active) { elements.wizardGroup.position.y = 1; elements.magicLight.intensity = 2; elements.particles.material.color.setHex(0xd946ef); elements.runes.forEach(r => { r.visible = true; r.material.color.setHex(0xd946ef); r.material.wireframe = false; }); elements.zs.forEach(z => z.visible = false); } else { elements.wizardGroup.position.y = 0; elements.magicLight.intensity = 0; elements.particles.material.color.setHex(0xc084fc); elements.runes.forEach(r => { r.visible = true; r.material.color.setHex(0x00ffff); r.material.wireframe = true; }); elements.zs.forEach(z => z.visible = false); } }
+        function startWizardRest(active) { if(active) { elements.wizardGroup.position.y = -0.5; elements.wizardGroup.rotation.x = 0.2; elements.runes.forEach(r => r.visible = false); elements.zs.forEach(z => z.visible = true); } else { elements.wizardGroup.position.y = 0; elements.wizardGroup.rotation.x = 0; elements.runes.forEach(r => r.visible = true); elements.zs.forEach(z => z.visible = false); } }
 
         function animate() {
             requestAnimationFrame(animate); const time = Date.now() * 0.001;
-            
             if (elements.wizardGroup) {
-                if (elements.runes && elements.runes[0].visible) {
-                    elements.runes.forEach(rune => {
-                        const rData = rune.userData;
-                        const activeSpeed = isFocusing ? rData.speed * 3 : rData.speed;
-                        const activeRadius = isFocusing ? rData.radius * 0.8 : rData.radius;
-                        rune.position.x = Math.cos(time * activeSpeed + rData.angle) * activeRadius;
-                        rune.position.z = Math.sin(time * activeSpeed + rData.angle) * activeRadius;
-                        rune.position.y = rData.yOffset + Math.sin(time * 2 + rData.angle) * 0.5;
-                        rune.rotation.x += 0.02; rune.rotation.y += 0.03;
-                    });
-                }
-                if (elements.zs && elements.zs[0].visible) {
-                    elements.zs.forEach((z, i) => {
-                        const loopTime = (time + i) % 3;
-                        z.position.y = 5 + loopTime * 0.8;
-                        z.position.x = 0.5 + Math.sin(loopTime * 3) * 0.2;
-                        z.material.opacity = 1 - (loopTime / 3);
-                    });
-                }
-                if (!isFocusing) {
-                    if (elements.wizardGroup.rotation.x === 0) {
-                        elements.wizardGroup.position.y = Math.sin(time) * 0.2 + (gameState.stamina < 30 ? -0.5 : 0);
-                    }
-                    elements.wizardGroup.rotation.y += 0.01 * spinSpeed;
-                    if (elements.cape) elements.cape.rotation.x = 0.25 + Math.sin(time * 5) * 0.1;
-                } else {
-                    elements.wizardGroup.rotation.y += 0.05; elements.wizardGroup.position.y = 1 + Math.sin(time * 5) * 0.1;
-                }
+                if (elements.runes && elements.runes[0].visible) { elements.runes.forEach(rune => { const rData = rune.userData; const activeSpeed = isFocusing ? rData.speed * 3 : rData.speed; const activeRadius = isFocusing ? rData.radius * 0.8 : rData.radius; rune.position.x = Math.cos(time * activeSpeed + rData.angle) * activeRadius; rune.position.z = Math.sin(time * activeSpeed + rData.angle) * activeRadius; rune.position.y = rData.yOffset + Math.sin(time * 2 + rData.angle) * 0.5; rune.rotation.x += 0.02; rune.rotation.y += 0.03; }); }
+                if (elements.zs && elements.zs[0].visible) { elements.zs.forEach((z, i) => { const loopTime = (time + i) % 3; z.position.y = 5 + loopTime * 0.8; z.position.x = 0.5 + Math.sin(loopTime * 3) * 0.2; z.material.opacity = 1 - (loopTime / 3); }); }
+                if (!isFocusing) { if (elements.wizardGroup.rotation.x === 0) { elements.wizardGroup.position.y = Math.sin(time) * 0.2 + (gameState.stamina < 30 ? -0.5 : 0); } elements.wizardGroup.rotation.y += 0.01 * spinSpeed; if (elements.cape) elements.cape.rotation.x = 0.25 + Math.sin(time * 5) * 0.1; } else { elements.wizardGroup.rotation.y += 0.05; elements.wizardGroup.position.y = 1 + Math.sin(time * 5) * 0.1; }
             }
             if (elements.particles) elements.particles.rotation.y = time * (isFocusing ? 0.2 : 0.05);
             renderer.render(scene, camera);
         }
 
         function startGame() {
-            const name = document.getElementById('char-name-input').value || "Dev";
-            gameState.name = name;
-            document.getElementById('login-overlay').classList.remove('active');
-            
-            // Check mobile for auto-minimize
-            if (window.innerWidth <= 768) {
-                document.getElementById('quest-log-panel').classList.add('minimized');
-            }
-            
+            const name = document.getElementById('char-name-input').value || "Dev"; gameState.name = name; document.getElementById('login-overlay').classList.remove('active');
+            if (window.innerWidth <= 768) document.getElementById('quest-log-panel').classList.add('minimized');
             initWorld(); rpgSystem.updateUI();
         }
         
-        window.addEventListener('keydown', (e) => {
-            if (e.altKey && e.shiftKey && (e.key === 'd' || e.key === 'D')) {
-                e.preventDefault();
-                const panel = document.getElementById('admin-panel');
-                panel.classList.toggle('active');
-            }
-        });
-        
-        window.addEventListener('resize', () => {
-            if (camera && renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
-                updateCameraPosition();
-            }
-        });
+        window.addEventListener('keydown', (e) => { if (e.altKey && e.shiftKey && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); document.getElementById('admin-panel').classList.toggle('active'); } });
+        window.addEventListener('resize', () => { if (camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); updateCameraPosition(); } });
 
     </script>
 </body>
