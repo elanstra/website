@@ -86,7 +86,10 @@
             font-size: 1.2rem; color: white;
             box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
             border: 2px solid rgba(255,255,255,0.2);
+            cursor: pointer; /* Hint that it's clickable */
+            transition: transform 0.1s;
         }
+        .avatar-circle:active { transform: scale(0.9); }
 
         .stat-group { display: flex; flex-direction: column; flex: 1; }
         
@@ -367,7 +370,7 @@
     <div class="hud">
         <!-- Top Stats Bar -->
         <div class="stats-bar hud__interactive">
-            <div class="avatar-circle">
+            <div class="avatar-circle" onclick="rpgSystem.admin.clickTrigger()">
                 <i class="fas fa-user-astronaut"></i>
             </div>
             
@@ -535,6 +538,21 @@
         const rpgSystem = {
             // ADMIN FUNCTIONS
             admin: {
+                clicks: 0,
+                clickTimer: null,
+                
+                clickTrigger: () => {
+                    rpgSystem.admin.clicks++;
+                    if(rpgSystem.admin.clicks >= 5) {
+                        rpgSystem.admin.clicks = 0;
+                        document.getElementById('admin-panel').classList.toggle('active');
+                        rpgSystem.showToast("Admin Mode Activated via Avatar", "fa-user-secret");
+                    }
+                    // Reset clicks if not fast enough
+                    clearTimeout(rpgSystem.admin.clickTimer);
+                    rpgSystem.admin.clickTimer = setTimeout(() => { rpgSystem.admin.clicks = 0; }, 500);
+                },
+
                 addXP: (amount) => {
                     rpgSystem.showToast(`Admin: Added ${amount} XP`, "fa-user-secret");
                     gameState.xp += amount;
@@ -1038,9 +1056,11 @@
             initWorld(); rpgSystem.updateUI();
         }
         
-        // Key Listener for Admin Panel
+        // Key Listener for Admin Panel (Now Shift + Alt + D)
         window.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'a' || e.key === 'A')) {
+            // Changed to Alt + Shift + D to avoid Windows conflicts
+            if (e.altKey && e.shiftKey && (e.key === 'd' || e.key === 'D')) {
+                e.preventDefault(); // Stop browser/OS from handling it if possible
                 const panel = document.getElementById('admin-panel');
                 panel.classList.toggle('active');
             }
