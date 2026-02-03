@@ -277,6 +277,10 @@
         .btn-finish:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
         .btn-cancel { background: rgba(255,255,255,0.1); color: #ccc; }
         .btn-cancel:hover { background: rgba(255,255,255,0.2); color: white; }
+        .btn-pause { background: var(--gold-gradient); color: #000; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); }
+        .btn-pause:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6); }
+        .btn-pause.paused { background: var(--blue-gradient); color: white; }
+        .btn-pause.paused i::before { content: "\f04b"; } /* Play icon when paused */
 
         .dock {
             display: flex; gap: 12px; background: rgba(10, 10, 20, 0.7);
@@ -569,7 +573,8 @@
                 <div id="hud-timer-label" class="timer-label">Current Task</div>
                 <div id="hud-timer-val" class="timer-digits">25:00</div>
                 <div class="timer-actions">
-                    <button class="btn-pill btn-cancel" onclick="rpgSystem.cancelAction()"><i class="fas fa-times"></i> Stop</button>
+                    <button class="btn-pill btn-cancel" onclick="rpgSystem.cancelAction()" title="Stop and return task to queue"><i class="fas fa-times"></i> Stop</button>
+                    <button id="hud-pause-btn" class="btn-pill btn-pause" onclick="rpgSystem.togglePause()"><i class="fas fa-pause"></i> Pause</button>
                     <button id="hud-finish-btn" class="btn-pill btn-finish" onclick="rpgSystem.finishAction()"><i class="fas fa-check"></i> Complete</button>
                 </div>
             </div>
@@ -638,6 +643,9 @@
             completedTasks: [], 
             activeTask: null, 
             timerInterval: null,
+            // Timer state
+            isPaused: false,
+            timeLeft: 0,
             // New stats
             streak: 0,
             lastCompletedDate: null,
@@ -895,12 +903,61 @@
             startRest: () => { gameState.activeTask = { type: 'rest', xp: 0, cost: 0, duration: 5 * 60, title: "Mana Recharge" }; rpgSystem.initTimerUI(true); },
 
             initTimerUI: (isRest) => {
-                document.getElementById('controls-bar').classList.add('disabled'); document.getElementById('hud-timer-panel').classList.remove('hidden');
-                if (isRest) { document.getElementById('hud-timer-label').innerText = "MEDITATING..."; document.getElementById('hud-finish-btn').style.display = 'none'; startWizardRest(true); }
-                else { document.getElementById('hud-timer-label').innerText = gameState.activeTask.title; document.getElementById('hud-finish-btn').style.display = 'flex'; startWizardFocus(true); }
-                let timeLeft = gameState.activeTask.duration; updateTimerDisplay(timeLeft);
+                document.getElementById('controls-bar').classList.add('disabled'); 
+                document.getElementById('hud-timer-panel').classList.remove('hidden');
+                
+                // Reset pause state
+                gameState.isPaused = false;
+                const pauseBtn = document.getElementById('hud-pause-btn');
+                pauseBtn.classList.remove('paused');
+                pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                
+                if (isRest) { 
+                    document.getElementById('hud-timer-label').innerText = "MEDITATING..."; 
+                    document.getElementById('hud-finish-btn').style.display = 'none'; 
+                    pauseBtn.style.display = 'none'; // No pause during rest
+                    startWizardRest(true); 
+                } else { 
+                    document.getElementById('hud-timer-label').innerText = gameState.activeTask.title; 
+                    document.getElementById('hud-finish-btn').style.display = 'flex'; 
+                    pauseBtn.style.display = 'flex';
+                    startWizardFocus(true); 
+                }
+                
+                gameState.timeLeft = gameState.activeTask.duration; 
+                updateTimerDisplay(gameState.timeLeft);
+                
                 if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-                gameState.timerInterval = setInterval(() => { timeLeft--; updateTimerDisplay(timeLeft); if (timeLeft <= 0) { clearInterval(gameState.timerInterval); rpgSystem.finishAction(); } }, 1000);
+                gameState.timerInterval = setInterval(() => { 
+                    if (!gameState.isPaused) {
+                        gameState.timeLeft--; 
+                        updateTimerDisplay(gameState.timeLeft); 
+                        if (gameState.timeLeft <= 0) { 
+                            clearInterval(gameState.timerInterval); 
+                            rpgSystem.finishAction(); 
+                        }
+                    }
+                }, 1000);
+            },
+            
+            togglePause: () => {
+                gameState.isPaused = !gameState.isPaused;
+                const pauseBtn = document.getElementById('hud-pause-btn');
+                const timerLabel = document.getElementById('hud-timer-label');
+                
+                if (gameState.isPaused) {
+                    pauseBtn.classList.add('paused');
+                    pauseBtn.innerHTML = '<i class="fas fa-play"></i> Resume';
+                    timerLabel.innerText = "PAUSED - " + gameState.activeTask.title;
+                    startWizardFocus(false); // Wizard stops focusing animation
+                    rpgSystem.showToast("Timer paused", "fa-pause");
+                } else {
+                    pauseBtn.classList.remove('paused');
+                    pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                    timerLabel.innerText = gameState.activeTask.title;
+                    startWizardFocus(true); // Resume wizard animation
+                    rpgSystem.showToast("Timer resumed", "fa-play");
+                }
             },
 
             finishAction: () => {
@@ -941,8 +998,30 @@
 
             cancelAction: () => {
                 if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-                document.getElementById('hud-timer-panel').classList.add('hidden'); document.getElementById('controls-bar').classList.remove('disabled');
-                startWizardFocus(false); startWizardRest(false); rpgSystem.showToast("Focus Interrupted", "fa-ban"); rpgSystem.updateUI();
+                document.getElementById('hud-timer-panel').classList.add('hidden'); 
+                document.getElementById('controls-bar').classList.remove('disabled');
+                startWizardFocus(false); startWizardRest(false);
+                
+                // Return task to queue (not for rest)
+                const task = gameState.activeTask;
+                if (task && task.type !== 'rest') {
+                    // Add back to planned tasks at the beginning
+                    gameState.plannedTasks.unshift({
+                        id: Date.now(),
+                        title: task.title,
+                        type: task.type,
+                        xp: task.xp,
+                        cost: task.cost,
+                        duration: task.duration
+                    });
+                    rpgSystem.showToast("Task returned to queue", "fa-undo");
+                } else {
+                    rpgSystem.showToast("Rest cancelled", "fa-ban");
+                }
+                
+                gameState.activeTask = null;
+                gameState.isPaused = false;
+                rpgSystem.updateUI();
             },
 
             levelUp: () => {
