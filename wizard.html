@@ -122,7 +122,7 @@
 
         /* --- QUEST BOARD --- */
         .quest-log {
-            position: absolute; top: 100px; right: 24px; width: 360px;
+            position: absolute; top: 24px; right: 24px; width: 360px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
@@ -130,7 +130,7 @@
             max-height: 70vh; display: flex; flex-direction: column;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s, max-height 0.3s;
         }
 
         .quest-log.minimized {
@@ -253,6 +253,12 @@
         .bottom-hud {
             align-self: center; display: flex; flex-direction: column; align-items: center; gap: 20px; 
             margin-bottom: 40px; pointer-events: auto; width: 100%;
+            transition: margin-bottom 0.3s ease;
+        }
+        
+        /* Reduce bottom margin when timer is active (dock is hidden) */
+        body.timer-active .bottom-hud {
+            margin-bottom: 20px;
         }
 
         .hud-timer-panel {
@@ -399,6 +405,123 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
+        
+        /* Settings button */
+        .settings-btn {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(12px);
+            z-index: 15;
+        }
+        .settings-btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+            color: white;
+            transform: rotate(45deg);
+            border-color: #8b5cf6;
+        }
+        
+        /* Theme selector grid */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .theme-option {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .theme-option::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.3;
+            z-index: 0;
+        }
+        .theme-option i, .theme-option span {
+            position: relative;
+            z-index: 1;
+        }
+        .theme-option i {
+            font-size: 1.5rem;
+        }
+        .theme-option span {
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .theme-option:hover {
+            transform: translateY(-3px);
+        }
+        .theme-option.selected {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+        }
+        .theme-option.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .theme-option.locked::after {
+            content: '\f023';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.7rem;
+            color: #888;
+        }
+        
+        /* Theme colors */
+        .theme-forest { background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); }
+        .theme-forest i { color: #4ade80; }
+        .theme-desert { background: linear-gradient(135deg, #92400e 0%, #451a03 100%); }
+        .theme-desert i { color: #fbbf24; }
+        .theme-snow { background: linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 100%); }
+        .theme-snow i { color: #0ea5e9; }
+        .theme-snow span { color: #0c4a6e; }
+        .theme-volcano { background: linear-gradient(135deg, #7f1d1d 0%, #1c0a0a 100%); }
+        .theme-volcano i { color: #ef4444; }
+        .theme-ocean { background: linear-gradient(135deg, #0c4a6e 0%, #082f49 100%); }
+        .theme-ocean i { color: #22d3ee; }
+        .theme-sakura { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); }
+        .theme-sakura i { color: #ec4899; }
+        .theme-sakura span { color: #9d174d; }
+        .theme-nether { background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); }
+        .theme-nether i { color: #c084fc; }
+        .theme-golden { background: linear-gradient(135deg, #fbbf24 0%, #b45309 100%); }
+        .theme-golden i { color: #fff; }
+        .theme-golden span { color: #78350f; }
+        
+        .unlock-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 10px;
+        }
 
         /* Daily stats */
         .daily-stats {
@@ -417,6 +540,92 @@
             font-size: 0.8rem;
         }
 
+        /* --- MEDIUM SCREEN (Tablet / Small Desktop) --- */
+        @media (max-width: 1100px) and (min-width: 769px) {
+            .quest-log {
+                width: 300px;
+                max-height: 45vh;
+            }
+            .quest-header {
+                padding: 15px;
+            }
+            .quest-header h3 {
+                font-size: 1rem;
+            }
+            .quest-content {
+                padding: 12px;
+            }
+            .quest-card {
+                padding: 10px 12px;
+            }
+            .quest-name {
+                font-size: 0.85rem;
+            }
+            .quest-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            .hud-timer-panel {
+                min-width: 260px;
+                padding: 15px 25px;
+            }
+            .timer-digits {
+                font-size: 2.8rem;
+            }
+            .bottom-hud {
+                margin-bottom: 20px;
+            }
+            body.timer-active .bottom-hud {
+                margin-bottom: 15px;
+            }
+        }
+
+        /* --- SMALLER MEDIUM SCREEN --- */
+        @media (max-width: 900px) and (min-width: 769px) {
+            .quest-log {
+                width: 240px;
+                max-height: 40vh;
+                right: 16px;
+                top: 24px;
+            }
+            .quest-header {
+                padding: 12px;
+            }
+            .quest-card {
+                padding: 8px 10px;
+                gap: 8px;
+            }
+            .quest-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 0.85rem;
+            }
+            .action-play {
+                width: 26px;
+                height: 26px;
+            }
+            .drag-handle {
+                display: none;
+            }
+            .hud-timer-panel {
+                min-width: 240px;
+                padding: 12px 20px;
+            }
+            .timer-digits {
+                font-size: 2.5rem;
+            }
+            .timer-actions {
+                gap: 8px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .btn-pill {
+                padding: 6px 14px;
+                font-size: 0.8rem;
+            }
+        }
+
         /* --- MOBILE MEDIA QUERY --- */
         @media (max-width: 768px) {
             .hud { padding: 16px; }
@@ -429,6 +638,15 @@
             
             /* Show Mobile Button */
             .mobile-quest-toggle { display: flex; }
+            
+            /* Settings button on mobile */
+            .settings-btn {
+                bottom: 16px;
+                right: 16px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
             
             /* Mobile Modal Styling */
             .mobile-modal-active .quest-log {
@@ -470,6 +688,11 @@
 
     <canvas id="game-canvas"></canvas>
     <div class="drag-hint"><i class="fas fa-hand-pointer"></i> Drag to rotate camera</div>
+    
+    <!-- Settings Button -->
+    <button class="settings-btn hud__interactive" onclick="rpgSystem.openThemeSelector()" title="Customize World">
+        <i class="fas fa-palette"></i>
+    </button>
 
     <!-- ADMIN PANEL -->
     <div class="admin-panel" id="admin-panel">
@@ -626,6 +849,19 @@
             </div>
         </div>
     </div>
+    
+    <!-- Theme Selector Modal -->
+    <div class="modal-overlay" id="theme-modal">
+        <div class="modal-card">
+            <i class="fas fa-times close-icon" onclick="document.getElementById('theme-modal').classList.remove('active')"></i>
+            <h2 class="modal-title"><i class="fas fa-palette" style="margin-right:8px;"></i>World Theme</h2>
+            <p class="modal-desc">Choose your landscape. Unlock more by leveling up!</p>
+            <div class="theme-grid" id="theme-grid">
+                <!-- Filled by JS -->
+            </div>
+            <p class="unlock-hint" id="unlock-hint"></p>
+        </div>
+    </div>
 
     <div class="toast-container" id="toast-container"></div>
 
@@ -650,10 +886,112 @@
             streak: 0,
             lastCompletedDate: null,
             dailyCompleted: 0,
-            totalFocusTime: 0
+            totalFocusTime: 0,
+            // Theme
+            currentTheme: 'forest'
         };
         const gearUnlocks = { 2: "Magic Staff", 3: "Mystic Cape", 5: "Crown of Focus", 10: "God Mode Aura" };
         const taskDefinitions = { light: { t: "Light", m: 5, x: 50, s: 5, icon: "fa-seedling" }, medium: { t: "Medium", m: 15, x: 150, s: 15, icon: "fa-fire" }, heavy: { t: "Heavy", m: 25, x: 500, s: 30, icon: "fa-dragon" } };
+        
+        // Theme definitions
+        const themes = {
+            forest: {
+                name: "Mystic Forest",
+                icon: "fa-tree",
+                unlockLevel: 1,
+                sky: 0x1e1b4b,
+                fog: 0x1e1b4b,
+                ground: 0x0f172a,
+                tree: 0x1e1b4b,
+                leaves: 0x334155,
+                rock: 0x1e293b,
+                particles: 0xc084fc
+            },
+            desert: {
+                name: "Amber Dunes",
+                icon: "fa-sun",
+                unlockLevel: 2,
+                sky: 0x451a03,
+                fog: 0x78350f,
+                ground: 0x92400e,
+                tree: 0x78350f,
+                leaves: 0xd97706,
+                rock: 0xa16207,
+                particles: 0xfbbf24
+            },
+            snow: {
+                name: "Frozen Peaks",
+                icon: "fa-snowflake",
+                unlockLevel: 3,
+                sky: 0x0c4a6e,
+                fog: 0x7dd3fc,
+                ground: 0xe0f2fe,
+                tree: 0x164e63,
+                leaves: 0xcffafe,
+                rock: 0x94a3b8,
+                particles: 0x7dd3fc
+            },
+            volcano: {
+                name: "Volcanic Wastes",
+                icon: "fa-fire-flame-curved",
+                unlockLevel: 4,
+                sky: 0x1c0a0a,
+                fog: 0x450a0a,
+                ground: 0x1c0a0a,
+                tree: 0x292524,
+                leaves: 0x44403c,
+                rock: 0x7f1d1d,
+                particles: 0xef4444
+            },
+            ocean: {
+                name: "Deep Ocean",
+                icon: "fa-water",
+                unlockLevel: 5,
+                sky: 0x082f49,
+                fog: 0x0c4a6e,
+                ground: 0x164e63,
+                tree: 0x134e4a,
+                leaves: 0x2dd4bf,
+                rock: 0x115e59,
+                particles: 0x22d3ee
+            },
+            sakura: {
+                name: "Cherry Blossom",
+                icon: "fa-fan",
+                unlockLevel: 6,
+                sky: 0xfce7f3,
+                fog: 0xfbcfe8,
+                ground: 0x4a044e,
+                tree: 0x581c87,
+                leaves: 0xf9a8d4,
+                rock: 0x86198f,
+                particles: 0xec4899
+            },
+            nether: {
+                name: "Shadow Realm",
+                icon: "fa-ghost",
+                unlockLevel: 8,
+                sky: 0x0f0520,
+                fog: 0x1e1b4b,
+                ground: 0x0f0520,
+                tree: 0x2e1065,
+                leaves: 0x7c3aed,
+                rock: 0x4c1d95,
+                particles: 0xc084fc
+            },
+            golden: {
+                name: "Golden Paradise",
+                icon: "fa-crown",
+                unlockLevel: 10,
+                sky: 0x78350f,
+                fog: 0xb45309,
+                ground: 0x451a03,
+                tree: 0x92400e,
+                leaves: 0xfbbf24,
+                rock: 0xfbbf24,
+                particles: 0xfef08a
+            }
+        };
 
         // Drag & Drop state
         let draggedElement = null;
@@ -905,6 +1243,7 @@
             initTimerUI: (isRest) => {
                 document.getElementById('controls-bar').classList.add('disabled'); 
                 document.getElementById('hud-timer-panel').classList.remove('hidden');
+                document.body.classList.add('timer-active'); // Add class for responsive styling
                 
                 // Reset pause state
                 gameState.isPaused = false;
@@ -962,7 +1301,9 @@
 
             finishAction: () => {
                 if (gameState.timerInterval) clearInterval(gameState.timerInterval); const task = gameState.activeTask;
-                document.getElementById('hud-timer-panel').classList.add('hidden'); document.getElementById('controls-bar').classList.remove('disabled');
+                document.getElementById('hud-timer-panel').classList.add('hidden'); 
+                document.getElementById('controls-bar').classList.remove('disabled');
+                document.body.classList.remove('timer-active'); // Remove class
                 startWizardFocus(false); startWizardRest(false);
                 if (task.type === 'rest') { gameState.stamina = 100; rpgSystem.showToast("Mana Restored Full", "fa-bolt"); }
                 else {
@@ -1000,6 +1341,7 @@
                 if (gameState.timerInterval) clearInterval(gameState.timerInterval);
                 document.getElementById('hud-timer-panel').classList.add('hidden'); 
                 document.getElementById('controls-bar').classList.remove('disabled');
+                document.body.classList.remove('timer-active'); // Remove class
                 startWizardFocus(false); startWizardRest(false);
                 
                 // Return task to queue (not for rest)
@@ -1039,6 +1381,88 @@
                 setTimeout(() => div.remove(), 3000);
             },
             
+            // Theme selector
+            openThemeSelector: () => {
+                const grid = document.getElementById('theme-grid');
+                grid.innerHTML = '';
+                
+                let nextUnlock = null;
+                
+                Object.entries(themes).forEach(([key, theme]) => {
+                    const isUnlocked = gameState.level >= theme.unlockLevel;
+                    const isSelected = gameState.currentTheme === key;
+                    
+                    if (!isUnlocked && !nextUnlock) {
+                        nextUnlock = theme;
+                    }
+                    
+                    const div = document.createElement('div');
+                    div.className = `theme-option theme-${key}${isSelected ? ' selected' : ''}${!isUnlocked ? ' locked' : ''}`;
+                    div.innerHTML = `<i class="fas ${theme.icon}"></i><span>${theme.name}</span>`;
+                    
+                    if (isUnlocked) {
+                        div.onclick = () => rpgSystem.selectTheme(key);
+                    } else {
+                        div.title = `Unlock at Level ${theme.unlockLevel}`;
+                    }
+                    
+                    grid.appendChild(div);
+                });
+                
+                // Show unlock hint
+                const hint = document.getElementById('unlock-hint');
+                if (nextUnlock) {
+                    hint.innerHTML = `<i class="fas fa-lock"></i> Next unlock: <strong>${nextUnlock.name}</strong> at Level ${nextUnlock.unlockLevel}`;
+                } else {
+                    hint.innerHTML = `<i class="fas fa-star"></i> All themes unlocked! You're a true focus master.`;
+                }
+                
+                document.getElementById('theme-modal').classList.add('active');
+            },
+            
+            selectTheme: (themeKey) => {
+                gameState.currentTheme = themeKey;
+                rpgSystem.applyTheme(themeKey);
+                rpgSystem.saveGame();
+                rpgSystem.showToast(`Theme: ${themes[themeKey].name}`, themes[themeKey].icon);
+                document.getElementById('theme-modal').classList.remove('active');
+            },
+            
+            applyTheme: (themeKey) => {
+                const theme = themes[themeKey];
+                if (!scene) return;
+                
+                // Update fog
+                scene.fog.color.setHex(theme.fog);
+                
+                // Update background
+                document.getElementById('game-canvas').style.background = 
+                    `radial-gradient(circle at center, #${theme.sky.toString(16).padStart(6, '0')} 0%, #000000 100%)`;
+                
+                // Update ground
+                if (elements.ground) {
+                    elements.ground.material.color.setHex(theme.ground);
+                }
+                
+                // Update trees and rocks
+                scene.children.forEach(obj => {
+                    if (obj.userData && obj.userData.isTree) {
+                        obj.material.color.setHex(theme.tree);
+                        if (obj.children[0]) {
+                            obj.children[0].material.color.setHex(theme.leaves);
+                        }
+                    }
+                    if (obj.userData && obj.userData.isRock) {
+                        obj.material.color.setHex(theme.rock);
+                    }
+                });
+                
+                // Update particles
+                if (elements.particles) {
+                    elements.particles.material.color.setHex(theme.particles);
+                }
+            },
+            
             // Save/Load game
             saveGame: () => {
                 const saveData = {
@@ -1052,7 +1476,8 @@
                     streak: gameState.streak,
                     lastCompletedDate: gameState.lastCompletedDate,
                     dailyCompleted: gameState.dailyCompleted,
-                    totalFocusTime: gameState.totalFocusTime
+                    totalFocusTime: gameState.totalFocusTime,
+                    currentTheme: gameState.currentTheme
                 };
                 localStorage.setItem('rpgPomodoroSave', JSON.stringify(saveData));
             },
@@ -1091,7 +1516,8 @@
         let cameraAngle = 0; const cameraRadius = 13; let isDragging = false; let previousMouseX = 0;
 
         function initWorld() {
-            scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x1e1b4b, 0.02);
+            const theme = themes[gameState.currentTheme];
+            scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(theme.fog, 0.02);
             camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
             
             // Standard centered view
@@ -1129,27 +1555,39 @@
         }
 
         function createLandscape() {
-            const ground = new THREE.Mesh(new THREE.CylinderGeometry(40, 40, 1, 64), new THREE.MeshStandardMaterial({ color: 0x0f172a, flatShading: true }));
+            const theme = themes[gameState.currentTheme];
+            
+            const ground = new THREE.Mesh(new THREE.CylinderGeometry(40, 40, 1, 64), new THREE.MeshStandardMaterial({ color: theme.ground, flatShading: true }));
             ground.position.y = -0.5; ground.receiveShadow = true; scene.add(ground);
+            elements.ground = ground; // Store reference
+            
             for(let i=0; i<80; i++) {
                 const angle = Math.random() * Math.PI * 2; const radius = 6 + Math.random() * 30;
                 const x = Math.cos(angle) * radius; const z = Math.sin(angle) * radius;
                 if (Math.abs(x) < 3 && z > 5 && z < 15) continue;
                 if (Math.random() > 0.3) {
-                    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 1.5, 6), new THREE.MeshStandardMaterial({ color: 0x1e1b4b }));
-                    const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5, 4, 8), new THREE.MeshStandardMaterial({ color: 0x334155 }));
+                    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 1.5, 6), new THREE.MeshStandardMaterial({ color: theme.tree }));
+                    const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5, 4, 8), new THREE.MeshStandardMaterial({ color: theme.leaves }));
                     leaves.position.y = 2.5; trunk.add(leaves); trunk.position.set(x, 0.75, z); trunk.castShadow = true;
-                    const s = 0.8 + Math.random() * 0.5; trunk.scale.set(s,s,s); scene.add(trunk);
+                    const s = 0.8 + Math.random() * 0.5; trunk.scale.set(s,s,s); 
+                    trunk.userData = { isTree: true }; // Tag for theme updates
+                    scene.add(trunk);
                 } else {
-                    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(1 + Math.random()), new THREE.MeshStandardMaterial({ color: 0x1e293b, flatShading: true }));
-                    rock.position.set(x, 0, z); rock.rotation.set(Math.random(), Math.random(), Math.random()); scene.add(rock);
+                    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(1 + Math.random()), new THREE.MeshStandardMaterial({ color: theme.rock, flatShading: true }));
+                    rock.position.set(x, 0, z); rock.rotation.set(Math.random(), Math.random(), Math.random()); 
+                    rock.userData = { isRock: true }; // Tag for theme updates
+                    scene.add(rock);
                 }
             }
             const pGeo = new THREE.BufferGeometry(); const pCount = 300; const pPos = new Float32Array(pCount * 3);
             for(let i=0; i<pCount*3; i++) pPos[i] = (Math.random() - 0.5) * 60;
             pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-            elements.particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.15, color: 0xc084fc, transparent: true, opacity: 0.6 }));
+            elements.particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.15, color: theme.particles, transparent: true, opacity: 0.6 }));
             scene.add(elements.particles);
+            
+            // Update canvas background
+            document.getElementById('game-canvas').style.background = 
+                `radial-gradient(circle at center, #${theme.sky.toString(16).padStart(6, '0')} 0%, #000000 100%)`;
         }
 
         function createZTexture() {
