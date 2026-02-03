@@ -122,7 +122,7 @@
 
         /* --- QUEST BOARD --- */
         .quest-log {
-            position: absolute; top: 26px; right: 24px; width: 360px;
+            position: absolute; top: 100px; right: 24px; width: 360px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
@@ -179,6 +179,32 @@
         }
         .quest-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); }
         
+        /* Drag & Drop Styles */
+        .quest-card.draggable {
+            cursor: grab;
+        }
+        .quest-card.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+            border-color: #8b5cf6;
+        }
+        .quest-card.drag-over {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.15);
+        }
+        .drag-handle {
+            cursor: grab;
+            color: var(--text-muted);
+            opacity: 0.4;
+            transition: opacity 0.2s;
+            padding: 4px;
+        }
+        .quest-card:hover .drag-handle {
+            opacity: 1;
+        }
+        
         .quest-icon {
             width: 40px; height: 40px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
@@ -188,6 +214,7 @@
         .quest-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .quest-reward { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
         .highlight-xp { color: #fbbf24; font-weight: 700; }
+        .highlight-penalty { color: #ef4444; font-weight: 700; }
 
         .quest-actions { display: flex; gap: 8px; flex-shrink: 0; }
         .action-play { 
@@ -197,10 +224,30 @@
         .action-play:hover { background: #4ade80; color: black; box-shadow: 0 0 10px #4ade80; }
         .action-del { color: #f87171; opacity: 0.5; cursor: pointer; padding: 5px; transition: 0.2s; }
         .action-del:hover { opacity: 1; transform: scale(1.1); }
+        
+        /* Restore button for completed tasks */
+        .action-restore { 
+            color: #fbbf24; background: rgba(251, 191, 36, 0.15); width: 28px; height: 28px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; 
+            font-size: 0.7rem;
+        }
+        .action-restore:hover { background: #fbbf24; color: black; box-shadow: 0 0 10px #fbbf24; }
 
         .type-light .quest-icon { background: rgba(46, 204, 113, 0.2); color: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.1); }
         .type-medium .quest-icon { background: rgba(241, 196, 15, 0.2); color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.1); }
         .type-heavy .quest-icon { background: rgba(239, 68, 68, 0.2); color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.1); }
+
+        /* History section styling */
+        #history-list {
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        #history-list:hover {
+            opacity: 1;
+        }
+        #history-list .quest-card {
+            cursor: pointer;
+        }
 
         /* --- BOTTOM CONTROLS --- */
         .bottom-hud {
@@ -322,6 +369,7 @@
             animation: floatUp 3s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .toast i { color: #f59e0b; }
+        .toast.penalty i { color: #ef4444; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes floatUp { 0% { opacity: 0; transform: translateY(30px); } 10% { opacity: 1; transform: translateY(0); } 90% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-20px); } }
@@ -329,6 +377,41 @@
         .drag-hint { position: absolute; bottom: 20px; left: 20px; color: rgba(255,255,255,0.2); font-size: 0.8rem; pointer-events: none; }
         .close-icon { position: absolute; top: 15px; right: 15px; cursor: pointer; opacity: 0.5; font-size: 1.2rem; }
         .close-icon:hover { opacity: 1; }
+
+        /* Streak indicator */
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Daily stats */
+        .daily-stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .daily-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .daily-stat i {
+            font-size: 0.8rem;
+        }
 
         /* --- MOBILE MEDIA QUERY --- */
         @media (max-width: 768px) {
@@ -403,6 +486,10 @@
             <i class="fas fa-battery-empty"></i> Drain Stamina
             <small>Set to 5% (Test Low Power)</small>
         </button>
+        <button class="admin-btn" onclick="rpgSystem.admin.resetAll()">
+            <i class="fas fa-redo"></i> Reset Progress
+            <small>Clear all data</small>
+        </button>
         <button class="admin-btn" onclick="document.getElementById('admin-panel').classList.remove('active')">
             Close Panel
         </button>
@@ -417,7 +504,13 @@
                     <i class="fas fa-user-astronaut"></i>
                 </div>
                 <div class="stat-group">
-                    <div class="char-name" id="char-name-display">Player One</div>
+                    <div class="char-name">
+                        <span id="char-name-display">Player One</span>
+                        <span class="streak-badge" id="streak-badge" style="display:none;">
+                            <i class="fas fa-fire-flame-curved"></i>
+                            <span id="streak-count">0</span>
+                        </span>
+                    </div>
                     <div class="resource-row">
                         <div style="width: 20px; text-align:center; color:#fbbf24;"><i class="fas fa-crown"></i></div>
                         <div class="bar-wrapper">
@@ -431,6 +524,10 @@
                             <div class="bar-label"><span>Focus Energy</span></div>
                             <div class="progress-track"><div class="progress-fill stamina-fill" id="stamina-bar" style="width: 100%"></div></div>
                         </div>
+                    </div>
+                    <div class="daily-stats">
+                        <div class="daily-stat"><i class="fas fa-check-circle" style="color:#4ade80;"></i> <span id="daily-completed">0</span> today</div>
+                        <div class="daily-stat"><i class="fas fa-clock" style="color:#8b5cf6;"></i> <span id="total-focus-time">0</span>m focused</div>
                     </div>
                 </div>
             </div>
@@ -453,13 +550,13 @@
             </div>
             
             <div class="quest-content">
-                <div class="section-label">Quest Board</div>
+                <div class="section-label">Quest Board <span style="opacity:0.5; font-size:0.65rem; margin-left:4px;">(drag to reorder)</span></div>
                 <div class="quest-list" id="planned-list">
                     <!-- Dynamic Items -->
                 </div>
 
-                <div class="section-label" style="margin-top:10px;">Completions</div>
-                <div class="quest-list" id="history-list" style="opacity: 0.5; pointer-events:none;">
+                <div class="section-label" style="margin-top:10px;">Completions <span style="opacity:0.5; font-size:0.65rem; margin-left:4px;">(click to restore)</span></div>
+                <div class="quest-list" id="history-list">
                     <!-- History Items -->
                 </div>
             </div>
@@ -512,15 +609,47 @@
         </div>
     </div>
 
+    <!-- Restore Confirmation Modal -->
+    <div class="modal-overlay" id="restore-modal">
+        <div class="modal-card">
+            <i class="fas fa-times close-icon" onclick="document.getElementById('restore-modal').classList.remove('active')"></i>
+            <h2 class="modal-title">Restore Quest?</h2>
+            <p class="modal-desc" id="restore-desc">Restoring this quest will cost you XP as a penalty.</p>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button class="btn-pill btn-cancel" onclick="document.getElementById('restore-modal').classList.remove('active')">Cancel</button>
+                <button class="btn-pill btn-finish" id="restore-confirm-btn" style="background: var(--danger-gradient);"><i class="fas fa-undo"></i> Restore (-XP)</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-container" id="toast-container"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
         // --- GAME LOGIC ---
-        const gameState = { name: "Dev", level: 1, xp: 0, xpToNext: 1000, stamina: 100, plannedTasks: [], completedTasks: [], activeTask: null, timerInterval: null };
+        const gameState = { 
+            name: "Dev", 
+            level: 1, 
+            xp: 0, 
+            xpToNext: 1000, 
+            stamina: 100, 
+            plannedTasks: [], 
+            completedTasks: [], 
+            activeTask: null, 
+            timerInterval: null,
+            // New stats
+            streak: 0,
+            lastCompletedDate: null,
+            dailyCompleted: 0,
+            totalFocusTime: 0
+        };
         const gearUnlocks = { 2: "Magic Staff", 3: "Mystic Cape", 5: "Crown of Focus", 10: "God Mode Aura" };
         const taskDefinitions = { light: { t: "Light", m: 5, x: 50, s: 5, icon: "fa-seedling" }, medium: { t: "Medium", m: 15, x: 150, s: 15, icon: "fa-fire" }, heavy: { t: "Heavy", m: 25, x: 500, s: 30, icon: "fa-dragon" } };
+
+        // Drag & Drop state
+        let draggedElement = null;
+        let draggedTaskId = null;
 
         const rpgSystem = {
             admin: {
@@ -532,7 +661,13 @@
                 addXP: (amount) => { rpgSystem.showToast(`Admin: +${amount} XP`); gameState.xp += amount; if(gameState.xp >= gameState.xpToNext) rpgSystem.levelUp(); rpgSystem.updateUI(); },
                 forceLevelUp: () => { rpgSystem.showToast("Admin: Level Up"); gameState.xp = gameState.xpToNext; rpgSystem.levelUp(); },
                 fillStamina: () => { rpgSystem.showToast("Admin: Full Stamina"); gameState.stamina = 100; rpgSystem.updateUI(); },
-                drainStamina: () => { rpgSystem.showToast("Admin: Drained"); gameState.stamina = 5; rpgSystem.updateUI(); }
+                drainStamina: () => { rpgSystem.showToast("Admin: Drained"); gameState.stamina = 5; rpgSystem.updateUI(); },
+                resetAll: () => {
+                    if(confirm('Reset all progress? This cannot be undone!')) {
+                        localStorage.removeItem('rpgPomodoroSave');
+                        location.reload();
+                    }
+                }
             },
 
             updateUI: () => {
@@ -549,26 +684,176 @@
                     scene.fog.density = gameState.stamina < 30 ? 0.08 : 0.02;
                 }
                 
+                // Streak badge
+                const streakBadge = document.getElementById('streak-badge');
+                if (gameState.streak > 0) {
+                    streakBadge.style.display = 'inline-flex';
+                    document.getElementById('streak-count').innerText = gameState.streak;
+                } else {
+                    streakBadge.style.display = 'none';
+                }
+                
+                // Daily stats
+                document.getElementById('daily-completed').innerText = gameState.dailyCompleted;
+                document.getElementById('total-focus-time').innerText = gameState.totalFocusTime;
+                
                 document.getElementById('active-quest-count').innerText = gameState.plannedTasks.length;
                 rpgSystem.renderBoards();
                 updateWizardGear();
+                rpgSystem.saveGame();
             },
 
             renderBoards: () => {
                 const pList = document.getElementById('planned-list'); pList.innerHTML = '';
                 if(gameState.plannedTasks.length === 0) pList.innerHTML = `<div style="text-align:center; padding:10px; color:#555; font-size:0.7rem;">No active quests</div>`;
-                gameState.plannedTasks.forEach(t => {
+                gameState.plannedTasks.forEach((t, index) => {
                     const def = taskDefinitions[t.type];
-                    const div = document.createElement('div'); div.className = `quest-card type-${t.type}`;
-                    div.innerHTML = `<div class="quest-icon"><i class="fas ${def.icon}"></i></div><div class="quest-details"><div class="quest-name">${t.title}</div><div class="quest-reward"><span class="highlight-xp">+${def.x} XP</span> • ${def.m} min</div></div><div class="quest-actions"><div class="action-play" onclick="rpgSystem.startPlannedTask(${t.id})"><i class="fas fa-play" style="font-size:0.7rem;"></i></div><div class="action-del" onclick="rpgSystem.deletePlannedTask(${t.id})"><i class="fas fa-trash"></i></div></div>`;
+                    const div = document.createElement('div'); 
+                    div.className = `quest-card type-${t.type} draggable`;
+                    div.draggable = true;
+                    div.dataset.taskId = t.id;
+                    div.dataset.index = index;
+                    div.innerHTML = `
+                        <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                        <div class="quest-icon"><i class="fas ${def.icon}"></i></div>
+                        <div class="quest-details">
+                            <div class="quest-name">${t.title}</div>
+                            <div class="quest-reward"><span class="highlight-xp">+${def.x} XP</span> • ${def.m} min</div>
+                        </div>
+                        <div class="quest-actions">
+                            <div class="action-play" onclick="rpgSystem.startPlannedTask(${t.id})"><i class="fas fa-play" style="font-size:0.7rem;"></i></div>
+                            <div class="action-del" onclick="rpgSystem.deletePlannedTask(${t.id})"><i class="fas fa-trash"></i></div>
+                        </div>`;
+                    
+                    // Drag events
+                    div.addEventListener('dragstart', rpgSystem.handleDragStart);
+                    div.addEventListener('dragend', rpgSystem.handleDragEnd);
+                    div.addEventListener('dragover', rpgSystem.handleDragOver);
+                    div.addEventListener('dragenter', rpgSystem.handleDragEnter);
+                    div.addEventListener('dragleave', rpgSystem.handleDragLeave);
+                    div.addEventListener('drop', rpgSystem.handleDrop);
+                    
                     pList.appendChild(div);
                 });
+                
+                // History list with restore functionality
                 const hList = document.getElementById('history-list'); hList.innerHTML = '';
-                gameState.completedTasks.slice(-3).reverse().forEach(t => {
-                    const div = document.createElement('div'); div.className = `quest-card type-${t.type}`; div.style.opacity = "0.7";
-                    div.innerHTML = `<div class="quest-icon"><i class="fas fa-check"></i></div><div class="quest-details"><div class="quest-name" style="text-decoration:line-through;">${t.title}</div></div>`;
+                if(gameState.completedTasks.length === 0) {
+                    hList.innerHTML = `<div style="text-align:center; padding:10px; color:#555; font-size:0.7rem;">No completions yet</div>`;
+                }
+                gameState.completedTasks.slice(-5).reverse().forEach((t, index) => {
+                    const def = taskDefinitions[t.type];
+                    const penalty = Math.floor(def.x * 0.5); // 50% XP penalty
+                    const div = document.createElement('div'); 
+                    div.className = `quest-card type-${t.type}`;
+                    div.innerHTML = `
+                        <div class="quest-icon"><i class="fas fa-check"></i></div>
+                        <div class="quest-details">
+                            <div class="quest-name" style="text-decoration:line-through; opacity:0.7;">${t.title}</div>
+                            <div class="quest-reward">
+                                <span class="highlight-penalty">-${penalty} XP to restore</span>
+                            </div>
+                        </div>
+                        <div class="quest-actions">
+                            <div class="action-restore" onclick="rpgSystem.confirmRestore(${t.id}, '${t.title}', ${penalty})" title="Restore quest (-${penalty} XP)">
+                                <i class="fas fa-undo"></i>
+                            </div>
+                        </div>`;
                     hList.appendChild(div);
                 });
+            },
+
+            // Drag & Drop handlers
+            handleDragStart: (e) => {
+                draggedElement = e.currentTarget;
+                draggedTaskId = parseInt(e.currentTarget.dataset.taskId);
+                e.currentTarget.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', draggedTaskId);
+            },
+            
+            handleDragEnd: (e) => {
+                e.currentTarget.classList.remove('dragging');
+                document.querySelectorAll('.quest-card').forEach(card => {
+                    card.classList.remove('drag-over');
+                });
+                draggedElement = null;
+                draggedTaskId = null;
+            },
+            
+            handleDragOver: (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            },
+            
+            handleDragEnter: (e) => {
+                e.preventDefault();
+                if (e.currentTarget !== draggedElement && e.currentTarget.classList.contains('draggable')) {
+                    e.currentTarget.classList.add('drag-over');
+                }
+            },
+            
+            handleDragLeave: (e) => {
+                e.currentTarget.classList.remove('drag-over');
+            },
+            
+            handleDrop: (e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove('drag-over');
+                
+                if (e.currentTarget === draggedElement) return;
+                
+                const fromId = draggedTaskId;
+                const toId = parseInt(e.currentTarget.dataset.taskId);
+                
+                const fromIndex = gameState.plannedTasks.findIndex(t => t.id === fromId);
+                const toIndex = gameState.plannedTasks.findIndex(t => t.id === toId);
+                
+                if (fromIndex !== -1 && toIndex !== -1) {
+                    // Swap tasks
+                    const [movedTask] = gameState.plannedTasks.splice(fromIndex, 1);
+                    gameState.plannedTasks.splice(toIndex, 0, movedTask);
+                    rpgSystem.updateUI();
+                    rpgSystem.showToast("Quest order updated", "fa-arrows-alt");
+                }
+            },
+
+            // Restore functionality
+            confirmRestore: (id, title, penalty) => {
+                const modal = document.getElementById('restore-modal');
+                document.getElementById('restore-desc').innerHTML = `
+                    Restoring "<strong>${title}</strong>" will cost you <span style="color:#ef4444; font-weight:700;">${penalty} XP</span> as a penalty.<br><br>
+                    Your current XP: ${gameState.xp}
+                `;
+                document.getElementById('restore-confirm-btn').onclick = () => {
+                    rpgSystem.restoreTask(id, penalty);
+                    modal.classList.remove('active');
+                };
+                modal.classList.add('active');
+            },
+            
+            restoreTask: (id, penalty) => {
+                const taskIndex = gameState.completedTasks.findIndex(t => t.id === id);
+                if (taskIndex === -1) return;
+                
+                const task = gameState.completedTasks[taskIndex];
+                
+                // Apply XP penalty
+                gameState.xp = Math.max(0, gameState.xp - penalty);
+                
+                // Move task back to planned
+                gameState.completedTasks.splice(taskIndex, 1);
+                gameState.plannedTasks.push({
+                    id: Date.now(), // New ID
+                    title: task.title,
+                    type: task.type,
+                    xp: taskDefinitions[task.type].x,
+                    cost: taskDefinitions[task.type].s,
+                    duration: taskDefinitions[task.type].m * 60
+                });
+                
+                rpgSystem.showToast(`Quest restored! -${penalty} XP`, "fa-undo", true);
+                rpgSystem.updateUI();
             },
 
             toggleMobileQuestModal: () => {
@@ -625,7 +910,29 @@
                 if (task.type === 'rest') { gameState.stamina = 100; rpgSystem.showToast("Mana Restored Full", "fa-bolt"); }
                 else {
                     gameState.stamina = Math.max(0, gameState.stamina - task.cost); gameState.xp += task.xp;
-                    gameState.completedTasks.push({ title: task.title, xp: task.xp, type: task.type }); rpgSystem.showToast(`Quest Complete! +${task.xp} XP`, "fa-check-circle");
+                    gameState.completedTasks.push({ id: Date.now(), title: task.title, xp: task.xp, type: task.type }); 
+                    
+                    // Update daily stats
+                    const today = new Date().toDateString();
+                    if (gameState.lastCompletedDate !== today) {
+                        // Check streak
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        if (gameState.lastCompletedDate === yesterday.toDateString()) {
+                            gameState.streak++;
+                        } else if (gameState.lastCompletedDate !== today) {
+                            gameState.streak = 1;
+                        }
+                        gameState.dailyCompleted = 1;
+                        gameState.lastCompletedDate = today;
+                    } else {
+                        gameState.dailyCompleted++;
+                    }
+                    
+                    // Add focus time
+                    gameState.totalFocusTime += taskDefinitions[task.type].m;
+                    
+                    rpgSystem.showToast(`Quest Complete! +${task.xp} XP`, "fa-check-circle");
                     if(elements.wizardGroup) { elements.wizardGroup.position.y += 1; const flash = new THREE.PointLight(0xffffff, 2, 10); flash.position.set(0,2,0); scene.add(flash); setTimeout(() => scene.remove(flash), 200); }
                     if (gameState.xp >= gameState.xpToNext) rpgSystem.levelUp();
                 }
@@ -645,9 +952,53 @@
                 rpgSystem.updateUI();
             },
 
-            showToast: (msg, icon) => {
-                const div = document.createElement('div'); div.className = 'toast'; div.innerHTML = `<i class="fas ${icon || 'fa-info-circle'}"></i> ${msg}`;
-                document.getElementById('toast-container').appendChild(div); setTimeout(() => div.remove(), 3000);
+            showToast: (msg, icon, isPenalty = false) => {
+                const div = document.createElement('div'); 
+                div.className = `toast${isPenalty ? ' penalty' : ''}`; 
+                div.innerHTML = `<i class="fas ${icon || 'fa-info-circle'}"></i> ${msg}`;
+                document.getElementById('toast-container').appendChild(div); 
+                setTimeout(() => div.remove(), 3000);
+            },
+            
+            // Save/Load game
+            saveGame: () => {
+                const saveData = {
+                    name: gameState.name,
+                    level: gameState.level,
+                    xp: gameState.xp,
+                    xpToNext: gameState.xpToNext,
+                    stamina: gameState.stamina,
+                    plannedTasks: gameState.plannedTasks,
+                    completedTasks: gameState.completedTasks,
+                    streak: gameState.streak,
+                    lastCompletedDate: gameState.lastCompletedDate,
+                    dailyCompleted: gameState.dailyCompleted,
+                    totalFocusTime: gameState.totalFocusTime
+                };
+                localStorage.setItem('rpgPomodoroSave', JSON.stringify(saveData));
+            },
+            
+            loadGame: () => {
+                const saved = localStorage.getItem('rpgPomodoroSave');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    Object.assign(gameState, data);
+                    
+                    // Check if daily stats need reset (new day)
+                    const today = new Date().toDateString();
+                    if (gameState.lastCompletedDate !== today) {
+                        // Check if streak should be reset
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        if (gameState.lastCompletedDate !== yesterday.toDateString()) {
+                            gameState.streak = 0;
+                        }
+                        gameState.dailyCompleted = 0;
+                    }
+                    
+                    return true;
+                }
+                return false;
             }
         };
 
@@ -750,16 +1101,34 @@
             const eyeR = new THREE.Mesh(eyeGeo, eyeMat.clone()); eyeR.position.set(-0.25, 3.9, 0.6); eyeR.rotation.y = -0.2; group.add(eyeR);
             elements.eyeL = eyeL; elements.eyeR = eyeR; // Save ref
 
-            // Hat
+            // Hat - FIXED ALIGNMENT
             const hatGroup = new THREE.Group();
+            
+            // Hat cone
             const hatCone = new THREE.Mesh(new THREE.ConeGeometry(1.0, 2.5, 8), new THREE.MeshStandardMaterial({ color: 0x312e81 }));
-            hatCone.translateY(1.25); hatCone.rotateX(-0.2); hatGroup.add(hatCone);
-            const hatRim = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.1, 8), new THREE.MeshStandardMaterial({ color: 0x312e81 }));
+            hatCone.position.y = 1.25; // Position from center
+            hatCone.rotation.x = -0.1; // Slight tilt
+            hatGroup.add(hatCone);
+            
+            // Hat rim (brim)
+            const hatRim = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.12, 16), new THREE.MeshStandardMaterial({ color: 0x312e81 }));
+            hatRim.position.y = 0;
             hatGroup.add(hatRim);
-            const hatBand = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.15, 8), new THREE.MeshStandardMaterial({ color: 0xfbbf24 }));
-            hatBand.translateY(0.2); hatGroup.add(hatBand);
-            hatGroup.position.y = 4.3; group.add(hatGroup);
-            elements.hatCone = hatCone; elements.hatRim = hatRim; // Save ref
+            
+            // Golden band - FIXED: Now wraps around the base of the cone properly
+            const hatBand = new THREE.Mesh(
+                new THREE.TorusGeometry(0.95, 0.08, 8, 32), // Torus for a proper ring shape
+                new THREE.MeshStandardMaterial({ color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 0.3 })
+            );
+            hatBand.rotation.x = Math.PI / 2; // Rotate to horizontal
+            hatBand.position.y = 0.15; // Just above the rim
+            hatGroup.add(hatBand);
+            
+            hatGroup.position.y = 4.4; // Position on head
+            group.add(hatGroup);
+            elements.hatCone = hatCone; 
+            elements.hatRim = hatRim;
+            elements.hatBand = hatBand;
 
             elements.runes = []; for(let i=0; i<3; i++) { const rune = new THREE.Mesh(new THREE.OctahedronGeometry(0.3), new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true })); rune.userData = { angle: (i / 3) * Math.PI * 2, speed: 1.5, radius: 2.5, yOffset: 2 }; group.add(rune); elements.runes.push(rune); }
             const zTex = createZTexture(); const zMat = new THREE.SpriteMaterial({ map: zTex, transparent: true, opacity: 0 }); elements.zs = []; for(let i=0; i<3; i++) { const zSprite = new THREE.Sprite(zMat.clone()); zSprite.scale.set(0.5, 0.5, 1); zSprite.position.set(0.5, 5, 0); zSprite.visible = false; zSprite.userData = { offset: i * 2, speed: 0.8 }; group.add(zSprite); elements.zs.push(zSprite); }
@@ -816,14 +1185,23 @@
         }
 
         function startGame() {
-            const name = document.getElementById('char-name-input').value || "Dev"; gameState.name = name; document.getElementById('login-overlay').classList.remove('active');
+            const name = document.getElementById('char-name-input').value || "Dev"; 
             
-            // REMOVED AUTO-MINIMIZE FOR MOBILE TO FIX INVISIBLE QUEST LIST BUG
-            // if (window.innerWidth <= 768) {
-            //    document.getElementById('quest-log-panel').classList.add('minimized');
-            // }
+            // Check for saved game
+            if (rpgSystem.loadGame()) {
+                // Use saved name if input is empty
+                if (!document.getElementById('char-name-input').value) {
+                    // Keep loaded name
+                } else {
+                    gameState.name = name;
+                }
+            } else {
+                gameState.name = name;
+            }
             
-            initWorld(); rpgSystem.updateUI();
+            document.getElementById('login-overlay').classList.remove('active');
+            initWorld(); 
+            rpgSystem.updateUI();
         }
         
         window.addEventListener('keydown', (e) => { if (e.altKey && e.shiftKey && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); document.getElementById('admin-panel').classList.toggle('active'); } });
